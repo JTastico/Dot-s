@@ -58,10 +58,12 @@ cd proyecto-mineria
 # Instalar dependencias del frontend
 cd frontend
 npm install
+npm run dev
 
 # Instalar dependencias del backend
 cd ../backend
 npm install
+npm run dev
 ```
 
 ## Configuración de MongoDB
