@@ -1,0 +1,89 @@
+.card {
+  width: 80px;
+  height: 160px;
+  border-radius: 15px;
+  border: 2px solid #000;
+  cursor: pointer;
+}
+
+.card.move {
+  transform: translate(200px, -100px);
+}
+
+.handCard {
+  transition: transform .5s;
+}
+
+.handCard:first-child {
+  rotate: -20deg;
+  transform: translate(110px, 80px);
+}
+
+.handCard:first-child:hover {
+  transform: translate(110px, 30px);
+}
+
+.handCard:nth-of-type(2) {
+  rotate: -10deg;
+  transform: translate(75px, 40px);
+}
+
+.handCard:nth-of-type(2):hover {
+  transform: translate(75px, -10px);
+}
+
+.handCard:nth-of-type(3) {
+  rotate: -5deg;
+  transform: translate(32px, 20px);
+}
+
+.handCard:nth-of-type(3):hover {
+  transform: translate(32px, -30px);
+}
+
+.handCard:nth-of-type(4) {
+  transform: translateY(13px);
+}
+
+.handCard:nth-of-type(4):hover {
+  transform: translateY(-30px);
+}
+
+.handCard:nth-of-type(5) {
+  rotate: 5deg;
+  transform: translate(-32px, 20px)
+}
+
+.handCard:nth-of-type(5):hover {
+  transform: translate(-32px, -30px);
+}
+
+.handCard:nth-of-type(6) {
+  rotate: 10deg;
+  transform: translate(-75px, 37px)
+}
+
+.handCard:nth-of-type(6):hover {
+  transform: translate(-75px, -10px);
+}
+
+.handCard:nth-of-type(7) {
+  rotate: 20deg;
+  transform: translate(-110px, 77px)
+}
+
+.handCard:nth-of-type(7):hover {
+  transform: translate(-110px, 30px);
+}
+/*  
+.handCard:hover {
+  //transform: translateZ(300px);
+}
+
+.handCard:hover + * {
+  //transform: translateZ(110px) rotateY(20deg);
+}
+
+.handCard:has(+ *:hover) {
+  //transform: translateZ(110px) rotateY(-20deg);
+} */

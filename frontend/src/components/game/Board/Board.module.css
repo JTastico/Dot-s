@@ -1,0 +1,72 @@
+.boardContainer {
+  display: flex;
+  position: relative;
+  justify-content: center;
+  align-items: center;
+  /* margin-top: 6rem; */
+  background-color: #ffffff;
+  width: clamp(200px, 350px, 1500px);
+
+  height: clamp(200px, 350px, 1500px);
+  border: min(7px, 1vw) solid #000; /* borde responsivo */
+
+  border-radius: 16px;
+  rotate: 45deg;
+  margin-top: 1rem;
+}
+
+.boardContainer::after {
+  content: "";
+  box-sizing: border-box;
+  display: flex;
+  position: absolute;
+  background-color: transparent;
+  width: 95%;
+  height: 95%;
+  border: min(7px, 1vw) solid #000;
+  border-radius: 12px;
+  z-index: -100;
+}
+
+.elementsContainer {
+  display: flex;
+  height: 100%;
+  flex-flow: column;
+  justify-content: space-between;
+  align-items: center;
+  rotate: -45deg;
+
+}
+
+.redBox {
+  height: 75px;
+  width: 75px;
+  background-color: transparent;
+  border: 3px solid red;
+}
+
+.pictogramContainer img {
+  width: 75px;
+  height: 75px;
+  object-fit: fill;
+}
+
+.centerCardsContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Media queries para ajustes específicos en móviles */
+@media (max-width: 1024px) {
+  .boardContainer {
+    width: clamp(250px, 80vw, 350px);
+    height: clamp(250px, 80vw, 350px);
+  }
+  
+  .redBox, .pictogramContainer img {
+    height: clamp(40px, 15vw, 60px);
+    width: clamp(40px, 15vw, 60px);
+  }
+}
