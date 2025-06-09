@@ -1,14 +1,21 @@
 .numberContainer {
-  height: 60px;
-  width: 60px;
+  height: clamp(40px, 10vw, 60px);
+  width: clamp(100%, 100%);
   background-color: #ffffff;
   border-radius: 5px;
   color: #000;
   border: none;
   cursor: pointer;
   font-family: inherit;
-  font-size: 1.6rem;
-  transition: transform .2s;
+  font-size: clamp(1rem, 4vw, 1.6rem); /* tamaño de fuente responsivo */
+  transition: transform 0.2s;
+  margin-left: 9px;
+  margin-right: 9px;
+
+  /*alinear los numeros dentro de la card*/
+  display: flex;
+  align-items: center;
+  justify-content: center;  
 }
 
 .numberContainer:hover {
@@ -19,4 +26,3 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
-
