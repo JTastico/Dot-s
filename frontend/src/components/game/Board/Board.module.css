@@ -70,3 +70,32 @@
     width: clamp(40px, 15vw, 60px);
   }
 }
+
+@media (max-width: 768px) {
+  .boardContainer {
+    width: 70vw;
+    height: 70vw;
+    rotate: 45deg; 
+    margin-top: 1rem;
+  }
+
+  .boardContainer::after {
+    width: 95%;
+    height: 95%;
+    border-radius: 8px;
+  }
+
+  .elementsContainer {
+    rotate: -45deg; 
+  }
+
+  .redBox, .pictogramContainer img {
+    width: clamp(px, vw, px);
+    height: clamp(px, vw, px);
+  }
+
+  .centerCardsContainer {
+    flex-wrap: wrap; 
+    gap: 10px;
+  }
+}

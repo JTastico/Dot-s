@@ -87,3 +87,23 @@
 .handCard:has(+ *:hover) {
   //transform: translateZ(110px) rotateY(-20deg);
 } */
+
+@media (max-width: 768px) {
+  .handCard {
+    rotate: 0deg !important;
+    transform: none !important;
+    margin: 0.25rem;
+    width: 60px;
+    height: 120px;
+    transition: transform .3s;
+  }
+
+  .handCard:hover {
+    transform: translateY(-10px) !important;
+  }
+
+  .card {
+    width: 60px;
+    height: 120px;
+  }
+}

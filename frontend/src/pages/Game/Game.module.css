@@ -120,3 +120,52 @@
   margin-top: 1rem;
   font-size: 1.5rem;
 }
+
+@media (max-width: 768px) {
+  .gameContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .questionContainer,
+  .boardContainer,
+  .elementsContainer,
+  .numbersContainer,
+  .cardContainer,
+  .acceptButton {
+    order: unset; /* Asegura que sigan el flujo natural */
+    width: 100%;
+    margin: 1rem auto;
+  }
+
+  .boardContainer {
+    transform: rotate(30deg);
+    width: clamp(200px, 90vw, 300px);
+    height: clamp(200px, 90vw, 300px);
+  }
+
+  .numbersContainer {
+    position: relative;
+    top: auto;
+    right: auto;
+    grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+  }
+
+  .cardContainer {
+    position: relative;
+    flex-wrap: wrap;
+    background: transparent;
+    box-shadow: none;
+    padding: 0;
+    gap: 0.5rem;
+  }
+
+  .acceptButton {
+    position: relative;
+    bottom: auto;
+    right: auto;
+    margin-top: 1rem;
+    text-align: center;
+  }
+}

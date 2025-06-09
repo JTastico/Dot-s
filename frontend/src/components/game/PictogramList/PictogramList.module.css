@@ -14,3 +14,19 @@
   padding: 6px;
   width: auto;
 }
+
+@media (max-width: 768px) {
+  .pictogramList {
+    position: relative;
+    margin: 1rem auto;
+    grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+    justify-items: center;
+    width: 90%;
+    left: auto;
+  }
+
+  .pictogramList img {
+    max-width: 50px;
+    height: auto;
+  }
+}

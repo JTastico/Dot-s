@@ -22,3 +22,15 @@
   height: 60px !important;
 }
 
+@media (max-width: 768px) {
+  .pictogramImage {
+    width: clamp(35px, 15vw, 55px) !important;
+    height: clamp(35px, 15vw, 55px) !important;
+  }
+
+  /*Tamaño de los pictogramas*/
+  .pictogramButton {
+    padding: 4px;
+    border-radius: 4px;
+  }
+}

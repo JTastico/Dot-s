@@ -148,17 +148,15 @@ export default function Game() {
           <p>Siguiente pregunta en: {visualTimeLeft} segundos</p>
         </div>
       )}
+
       <div className={styles.gameContainer}>
+        {/* Enunciado */}
         <div className={styles.questionContainer}>
           <h2>{question ? question.title : "Esperando pregunta..."}</h2>
           {timeLeft !== null && <p>Tiempo restante: {timeLeft} segundos</p>}
           <p>{message}</p>
         </div>
 
-        <PictogramList
-          onPictogramSelect={movePictogramToTop}
-          selectedPictogram={topPictogram}
-        />
         <Board
           topPictogram={topPictogram}
           onPictogramRemove={removePictogram}
@@ -166,6 +164,11 @@ export default function Game() {
           onCardRemove={removeCardFromCenter}
           bottomNumber={bottomNumber}
           onNumberRemove={removeNumberFromBottom}
+        />
+
+        <PictogramList
+          onPictogramSelect={movePictogramToTop}
+          selectedPictogram={topPictogram}
         />
 
         <div className={styles.numbersContainer}>
@@ -177,30 +180,31 @@ export default function Game() {
               disabled={bottomNumber !== null}
             />
           ))}
+    </div>
+
+        <div className={styles.cardContainer}>
+          {COLORS.map((color, index) => (
+            <Card
+              key={index}
+              cardColor={color}
+              onClick={() => moveCardToCenter(color)}
+              inHand={true}
+            />
+          ))}
+        </div>
+
+        <div className={styles.acceptButton}>
+          <GameButton
+            onClick={confirmResults}
+            disabled={
+              !topPictogram || centerCards.length === 0 || bottomNumber === null || hasAnswered
+            }
+          >
+            Confirmar
+          </GameButton>
         </div>
       </div>
-
-      <div className={styles.acceptButton}>
-        <GameButton
-          onClick={confirmResults}
-          disabled={
-            !topPictogram || centerCards.length === 0 || bottomNumber === null || hasAnswered
-          }
-        >
-          Confirmar
-        </GameButton>
-      </div>
-
-      <div className={styles.cardContainer}>
-        {COLORS.map((color, index) => (
-          <Card
-            key={index}
-            cardColor={color}
-            onClick={() => moveCardToCenter(color)}
-            inHand={true}
-          />
-        ))}
-      </div>
     </div>
+
   );
 }
