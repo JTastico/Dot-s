@@ -14,20 +14,12 @@ import GameResults from "./pages/GameResults/GameResults";
 const router = createBrowserRouter([
   {
     path: '/',
-    element: (
-      <Layout>
-        <Home />
-      </Layout>
-    ),
+    element: <Home />,  // ✅ SIN Layout wrapper
     errorElement: <NotFound />
   },
   {
     path: '/join',
-    element: (
-      <Layout>
-        <JoinGame />
-      </Layout>
-    ),
+    element: <JoinGame />  // ✅ SIN Layout wrapper
   },
   {
     path: '/login',
@@ -47,17 +39,11 @@ const router = createBrowserRouter([
   },
   {
     path: '/admin',
-    element: (
-      <Layout>
-        <Admin />
-      </Layout>
-    )
+    element: <Admin />  // ✅ Ya sin Layout
   },
   {
     path: '/game',
-    element: (
-      <Game />
-    )
+    element: <Game />  // ✅ Ya sin Layout
   },
   {
     path: '/game-results',
@@ -66,7 +52,6 @@ const router = createBrowserRouter([
         <GameResults />
       </Layout>
     )
-
   }
 ]);
 

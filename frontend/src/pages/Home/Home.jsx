@@ -1,97 +1,151 @@
-// src/pages/Home/Home.jsx
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Gamepad2, Users, Zap, Trophy, Play, ArrowRight } from "lucide-react";
 import styles from "./Home.module.css";
-import Input from "../../components/common/Input/Input"; // Tu componente Input original
-import logo from "../../assets/images/logo.png"; // Tu logo grande para el formulario PIN
-
-import { Sidebar } from "../../components/Sidebar";
-import { SectionContent } from "../../components/SectionContent";
-
-import {
-  MENU_ITEMS,
-  HOME_SECTION_DATA,
-  JOIN_GAME_SECTION_DATA, // Importa la nueva constante
-  GAME_SECTION_DATA,
-  ANALYTICS_SECTION_DATA,
-} from "../../utils/constants";
+import logo from "../../assets/images/logo.png";
 
 export default function Home() {
   const [pin, setPin] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  // Establece 'join_game' como la sección inicial si quieres que el PIN sea lo primero que vea el usuario.
-  const [activeSection, setActiveSection] = useState('join_game'); 
-  const [currentUser, setCurrentUser] = useState({ avatar: 'G', name: 'Usuario' });
 
   const handleSubmitPin = () => {
     if (!pin.trim()) {
-      alert("Por favor, ingresa un PIN válido."); // Puedes usar una validación más sofisticada
+      alert("Por favor, ingresa un PIN válido.");
       return;
     }
+    setIsLoading(true);
     localStorage.setItem("gamePin", pin);
-    navigate("/join"); // Redirige a la pantalla de ingreso al juego con el PIN
+    
+    // Simular carga y navegar
+    setTimeout(() => {
+      setIsLoading(false);
+      navigate("/join");
+    }, 1000);
   };
 
   const handleCreateGame = () => {
-    alert("Redirigiendo a la funcionalidad de crear juego.");
     navigate("/admin");
   };
 
-  const getCurrentSectionData = () => {
-    const data = { ...HOME_SECTION_DATA }; // Crea una copia para modificar
-
-    switch (activeSection) {
-      case 'dashboard':
-        return HOME_SECTION_DATA;
-      case 'join_game':
-        // Carga los datos base de JOIN_GAME_SECTION_DATA
-        const joinData = { ...JOIN_GAME_SECTION_DATA };
-        // Sobreescribe el onClick del botón "Unirse" para que llame a handleSubmitPin
-        joinData.buttons = joinData.buttons.map(button =>
-          button.label === "Unirse" ? { ...button, onClick: handleSubmitPin } : button
-        );
-        return joinData;
-      case 'my_games':
-        return GAME_SECTION_DATA;
-      case 'analytics':
-        return ANALYTICS_SECTION_DATA;
-      default:
-        return HOME_SECTION_DATA;
+  const features = [
+    {
+      icon: <Gamepad2 size={32} />,
+      title: "Juegos Interactivos",
+      description: "Aprende pictogramas de seguridad industrial de forma divertida y dinámica",
+      color: "#10b981"
+    },
+    {
+      icon: <Users size={32} />,
+      title: "Multijugador",
+      description: "Compite con amigos en tiempo real y demuestra tus conocimientos",
+      color: "#6366f1"
+    },
+    {
+      icon: <Trophy size={32} />,
+      title: "Sistema de Puntos",
+      description: "Gana puntos basados en velocidad y precisión para subir en el ranking",
+      color: "#f59e0b"
+    },
+    {
+      icon: <Zap size={32} />,
+      title: "Respuesta Rápida",
+      description: "Partidas dinámicas con tiempo limitado que pondrán a prueba tus reflejos",
+      color: "#ef4444"
     }
-  };
+  ];
 
   return (
-    <div className={styles.homePageWrapper}>
-      {/* ... (Tu Header global si lo tienes aquí, o en App.js) ... */}
-      {/* Ejemplo de cómo el Header de TSX podría ser el header superior si lo integras aquí */}
-      {/* <Header title="Dashboard" user={currentUser} /> */}
-
-
-      <div className={styles.mainContentArea}>
-        <div className={styles.sidebarContainer}>
-          <Sidebar
-            activeSection={activeSection}
-            onSectionChange={setActiveSection}
-            onCreateGame={handleCreateGame}
-          />
+    <div className={styles.homeContainer}>
+      {/* Header */}
+      <header className={styles.header}>
+        <div className={styles.logoSection}>
+          <img src={logo} alt="DOT'S GO Logo" className={styles.headerLogo} />
+          <span className={styles.headerTitle}>DOT'S GO!!</span>
         </div>
+        <button className={styles.createGameBtn} onClick={handleCreateGame}>
+          <Gamepad2 size={20} />
+          Crear Partida
+        </button>
+      </header>
 
-        <div className={styles.contentSection}>
-          {/* El contenido específico de la sección de PIN */}
-          {activeSection === 'join_game' && (
-            <SectionContent {...getCurrentSectionData()} />
-          )}
-            <div className={styles.pinFormContainer}> {/* Nueva clase para estilizar el contenedor del PIN */}
-                <Input
-                    placeholder="Ingresa el PIN del juego"
-                    buttonText="Unirse" // Este botón del input se puede ocultar si solo quieres el de SectionContent
-                    value={pin}
-                    onChange={(e) => setPin(e.target.value)}
-                    onSubmit={handleSubmitPin} // La lógica de submit para el Input
-                />
+      {/* Hero Section */}
+      <main className={styles.heroSection}>
+        <div className={styles.heroContent}>
+          {/* Left Side - Content */}
+          <div className={styles.heroLeft}>
+            <h1 className={styles.heroTitle}>
+              Aprende <span className={styles.highlight}>Seguridad Industrial</span>
+              <br />
+              Jugando
+            </h1>
+            <p className={styles.heroDescription}>
+              Domina los 17 pictogramas de sustancias peligrosas en partidas multijugador 
+              emocionantes. Compite, aprende y conviértete en un experto en seguridad.
+            </p>
+          </div>
+
+          {/* Right Side - PIN Input Card */}
+          <div className={styles.pinCard}>
+            <div className={styles.pinCardHeader}>
+              <Play size={24} />
+              <h3>Únete a una Partida</h3>
             </div>
+            
+            <div className={styles.pinInputSection}>
+              <input
+                type="text"
+                placeholder="Ingresa el PIN"
+                value={pin}
+                onChange={(e) => setPin(e.target.value.toUpperCase())}
+                className={styles.pinInput}
+                maxLength="8"
+                onKeyDown={(e) => e.key === "Enter" && handleSubmitPin()}
+              />
+              <button 
+                onClick={handleSubmitPin}
+                disabled={isLoading || !pin.trim()}
+                className={`${styles.joinBtn} ${isLoading ? styles.loading : ''}`}
+              >
+                {isLoading ? (
+                  <div className={styles.spinner}></div>
+                ) : (
+                  <>
+                    Unirse
+                    <ArrowRight size={20} />
+                  </>
+                )}
+              </button>
+            </div>
+
+            <div className={styles.pinHelp}>
+              <p>¿No tienes un PIN? <span className={styles.link} onClick={handleCreateGame}>Crea una partida</span></p>
+            </div>
+          </div>
         </div>
+
+        {/* Features Grid */}
+        <div className={styles.featuresSection}>
+          <h2 className={styles.featuresTitle}>¿Por qué elegir DOT'S GO!!?</h2>
+          <div className={styles.featuresGrid}>
+            {features.map((feature, index) => (
+              <div key={index} className={styles.featureCard}>
+                <div className={styles.featureIcon} style={{backgroundColor: `${feature.color}20`, color: feature.color}}>
+                  {feature.icon}
+                </div>
+                <h4 className={styles.featureTitle}>{feature.title}</h4>
+                <p className={styles.featureDescription}>{feature.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </main>
+
+      {/* Floating particles animation */}
+      <div className={styles.particles}>
+        {[...Array(8)].map((_, i) => (
+          <div key={i} className={`${styles.particle} ${styles[`particle${i + 1}`]}`}></div>
+        ))}
       </div>
     </div>
   );
