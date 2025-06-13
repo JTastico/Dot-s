@@ -16,6 +16,7 @@ import LivePreviewRombo from "../../components/game/LivePreview/LivePreviewRombo
 import ColorPicker from "../../components/game/ColorPicker/ColorPicker";
 import LogoPicker from "../../components/game/LogoPicker/LogoPicker";
 import NumberPicker from "../../components/game/NumberPicker/NumberPicker";
+import Header from "../../layouts/header/Header";
 
 export default function Game() {
   const navigate = useNavigate();
@@ -67,6 +68,25 @@ export default function Game() {
     }
   }, [topColor, bottomColor, currentStep]);
 
+  //Efecto para manejar la cuenta regresiva
+  useEffect(() => {
+    let intervalId;
+
+    if (timeLeft > 0) {
+      intervalId = setInterval(() => {
+        setTimeLeft(prevTime => {
+          if (prevTime <= 1) {
+            clearInterval(intervalId);
+            return 0;
+          }
+          return prevTime - 1;
+        });
+      }, 1000);
+    }
+
+    return () => clearInterval(intervalId);
+  }, [timeLeft]);
+
   useEffect(() => {
     const pin = localStorage.getItem("gamePin");
 
@@ -102,12 +122,17 @@ export default function Game() {
   }, [navigate]);
 
   return (
+    
     <DndProvider backend={HTML5Backend}>
+      
+      //Mostrar encabezado pero sin el boton de crear partida
+      <Header timeLeft={timeLeft} showCreateButton={false}>
+      </Header>
+
       <div className={styles.gameWrapper}>
         <div className={styles.gameContainer}>
           <div className={styles.questionContainer}>
             <h2>{question ? question.title : "Esperando pregunta..."}</h2>
-            {timeLeft !== null && <p>Tiempo restante: {timeLeft} segundos</p>}
           </div>
 
           <main className="designerLayout">

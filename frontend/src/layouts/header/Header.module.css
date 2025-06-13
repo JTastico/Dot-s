@@ -1,31 +1,84 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
+
+/* Header - Mantener fijo en la parte superior */
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: .6rem 2rem;
-  background: #222831;
-  width: 100%;
-  position: sticky;
+  padding: 20px 40px;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(139, 92, 246, 0.3);
+  /* MANTENER: Header fijo en la parte superior */
+  position: fixed;
   top: 0;
   left: 0;
-  z-index: 1000;
-
-  img {
-    display: flex;
-    width: 2.3rem !important;
-    height: 2.3rem !important;
-    object-fit: cover;
-  }
-
-  a {
-    height: auto;
-    margin: 0;
-    padding: 0;
-    align-self: center;
-  }
+  right: 0;
+  z-index: 10;
 }
 
-.headerNav {
+.logoSection {
   display: flex;
-  gap: 1rem;
+  align-items: center;
+  gap: 15px;
+}
+
+.headerLogo {
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  object-fit: contain;
+}
+
+.headerTitle {
+  font-size: 24px;
+  font-weight: 700;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.createGameBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #10b981, #34d399);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+  font-size: 14px;
+}
+
+.createGameBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+}
+
+
+/*Temporizador*/
+.timer {
+  font-size: 1.2rem;
+  font-weight: bold;
+  background-color: #4a5568;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  margin-left: auto; /* Para alinearlo a la derecha */
+  transition: all 0.3s ease;
+}
+
+.timer.lowTime {
+  background-color: #e53e3e;
+  animation: pulse 1s infinite;
+}
+
+/*Animacion del temporizador*/
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
 }
