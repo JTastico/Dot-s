@@ -125,7 +125,7 @@ export default function Game() {
     
     <DndProvider backend={HTML5Backend}>
       
-      //Mostrar encabezado pero sin el boton de crear partida
+      {/*Mostrar encabezado pero sin el boton de crear partida*/}
       <Header timeLeft={timeLeft} showCreateButton={false}>
       </Header>
 
@@ -135,7 +135,7 @@ export default function Game() {
             <h2>{question ? question.title : "Esperando pregunta..."}</h2>
           </div>
 
-          <main className="designerLayout">
+          <main className={styles.designerLayout}>
             <section className="previewSection">
               <LivePreviewRombo
                 topColorOption={topColor}
@@ -151,7 +151,7 @@ export default function Game() {
               />
             </section>
 
-            <section className="controlsSection">
+            <section className={styles.controlsSection}>
               {currentStep === 1 && (
                 <ColorPicker colors={solidColors} title="Paso 1: Arrastra Colores (Superior / Inferior)" />
               )}
@@ -165,7 +165,7 @@ export default function Game() {
               )}
 
               {currentStep === 4 && (
-                <div className="summarySection">
+                <div className={styles.summarySection}>
                   <h2>¡Pictograma Configurado!</h2>
                   <p><strong>Color Superior:</strong> {topColor?.name || 'No seleccionado'}</p>
                   <p><strong>Color Inferior:</strong> {bottomColor?.name || 'No seleccionado'}</p>
