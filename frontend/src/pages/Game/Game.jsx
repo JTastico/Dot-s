@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
+import { CheckCircle, Clock, Zap, Send, AlertCircle, Target, Trophy } from "lucide-react";
 
 import { socket } from "../../services/websocket/socketService";
 import styles from "./Game.module.css";
@@ -23,6 +24,10 @@ export default function Game() {
 
   const [question, setQuestion] = useState(null);
   const [timeLeft, setTimeLeft] = useState(null);
+  const [selectedCharacter, setSelectedCharacter] = useState(null);
+  
+  // NUEVO: Estado para saber si el juego ha iniciado alguna vez
+  const [gameHasStarted, setGameHasStarted] = useState(false);
 
   const [currentStep, setCurrentStep] = useState(1);
   const [topColor, setTopColor] = useState(null);
@@ -30,11 +35,20 @@ export default function Game() {
   const [symbol, setSymbol] = useState(null);
   const [symbolPosition, setSymbolPosition] = useState(null);
   const [number, setNumber] = useState(null);
-  const [numberPosition, setNumberPosition] = useState(null); // nuevo
+  const [numberPosition, setNumberPosition] = useState(null);
+
+  // Estados para feedback visual
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [submissionStatus, setSubmissionStatus] = useState(null);
+  const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
+  const [progressPercentage, setProgressPercentage] = useState(0);
 
   const solidColors = availableColors.filter((color) => color.type === 'solid');
 
   const handleTopColorDrop = (color) => {
+    if (hasSubmitted) return;
+    
     if (color.type !== 'solid') {
       alert("Por favor, arrastra un color sólido para la parte superior.");
       return;
@@ -43,6 +57,8 @@ export default function Game() {
   };
 
   const handleBottomColorDrop = (color) => {
+    if (hasSubmitted) return;
+    
     if (color.type !== 'solid') {
       alert("Por favor, arrastra un color sólido para la parte inferior.");
       return;
@@ -51,16 +67,31 @@ export default function Game() {
   };
 
   const handleSymbolDrop = (symbol, position) => {
+    if (hasSubmitted) return;
+    
     setSymbol(symbol);
     setSymbolPosition(position);
     setCurrentStep((prev) => (prev === 2 ? 3 : prev));
   };
 
   const handleNumberDrop = (num, position) => {
+    if (hasSubmitted) return;
+    
     setNumber(num === 'Sin Número' ? null : num);
     setNumberPosition(position);
     setCurrentStep((prev) => (prev === 3 ? 4 : prev));
   };
+
+  // Calcular progreso de completado
+  useEffect(() => {
+    let progress = 0;
+    if (topColor) progress += 25;
+    if (bottomColor) progress += 25;
+    if (symbol) progress += 25;
+    if (number !== null || currentStep >= 4) progress += 25;
+    
+    setProgressPercentage(progress);
+  }, [topColor, bottomColor, symbol, number, currentStep]);
 
   useEffect(() => {
     if (topColor && bottomColor && currentStep === 1) {
@@ -68,15 +99,19 @@ export default function Game() {
     }
   }, [topColor, bottomColor, currentStep]);
 
-  //Efecto para manejar la cuenta regresiva
+  // Efecto para manejar la cuenta regresiva
   useEffect(() => {
     let intervalId;
 
-    if (timeLeft > 0) {
+    if (timeLeft > 0 && !hasSubmitted) {
       intervalId = setInterval(() => {
         setTimeLeft(prevTime => {
           if (prevTime <= 1) {
             clearInterval(intervalId);
+            // Auto-submit si el tiempo se agota
+            if (!hasSubmitted) {
+              handleAutoSubmit();
+            }
             return 0;
           }
           return prevTime - 1;
@@ -85,92 +120,414 @@ export default function Game() {
     }
 
     return () => clearInterval(intervalId);
-  }, [timeLeft]);
+  }, [timeLeft, hasSubmitted]);
 
   useEffect(() => {
     const pin = localStorage.getItem("gamePin");
+    
+    // Cargar información del personaje seleccionado
+    const characterData = localStorage.getItem("selectedCharacter");
+    if (characterData) {
+      try {
+        const character = JSON.parse(characterData);
+        setSelectedCharacter(character);
+        console.log("Personaje cargado:", character);
+      } catch (error) {
+        console.error("Error al cargar personaje:", error);
+      }
+    }
+
+    // Verificar si el usuario viene del flujo correcto
+    const username = localStorage.getItem("username");
+    if (!username || !pin) {
+      console.log("Usuario no autenticado, redirigiendo al inicio");
+      navigate("/");
+      return;
+    }
 
     socket.emit("request-current-question", { pin }, (response) => {
       if (response.success) {
         setQuestion(response.question);
         setTimeLeft(response.timeLeft);
+        setGameHasStarted(true); // NUEVO: Marcar que el juego ha iniciado
+        console.log("Pregunta cargada:", response.question);
       } else {
         console.log(response.error || "Esperando a que el juego inicie");
+        if (response.error && response.error.includes("No hay juego activo")) {
+          navigate("/waiting-room");
+        }
       }
     });
 
     socket.on("game-started", ({ question, timeLimit }) => {
+      console.log("¡Juego iniciado desde sala de espera!");
+      resetGameState();
       setQuestion(question);
       setTimeLeft(timeLimit);
-      setTopColor(null);
-      setBottomColor(null);
-      setSymbol(null);
-      setSymbolPosition(null);
-      setNumber(null);
-      setNumberPosition(null);
-      setCurrentStep(1);
+      setGameHasStarted(true); // NUEVO: Marcar que el juego ha iniciado
     });
 
     socket.on("game-ended", ({ results }) => {
+      console.log("Juego terminado, redirigiendo a resultados");
+      localStorage.removeItem("selectedCharacter");
+      localStorage.removeItem("username");
       navigate("/game-results", { state: { results } });
+    });
+
+    socket.on("game-cancelled", () => {
+      alert("El juego ha sido cancelado por el administrador");
+      localStorage.removeItem("selectedCharacter");
+      localStorage.removeItem("username");
+      navigate("/");
+    });
+
+    socket.on("next-question", ({ question, timeLimit }) => {
+      console.log("Nueva pregunta recibida:", question);
+      resetGameState();
+      setQuestion(question);
+      setTimeLeft(timeLimit);
+      setGameHasStarted(true); // NUEVO: Asegurar que está marcado como iniciado
+    });
+
+    // Escuchar confirmación de respuesta
+    socket.on("answer-received", ({ success, message }) => {
+      setIsSubmitting(false);
+      if (success) {
+        setSubmissionStatus('success');
+        setShowSuccessAnimation(true);
+        setTimeout(() => setShowSuccessAnimation(false), 2000);
+      } else {
+        setSubmissionStatus('error');
+        setTimeout(() => setSubmissionStatus(null), 3000);
+      }
     });
 
     return () => {
       socket.off("game-started");
       socket.off("game-ended");
+      socket.off("game-cancelled");
+      socket.off("next-question");
+      socket.off("answer-received");
     };
   }, [navigate]);
 
-  return (
-    
-    <DndProvider backend={HTML5Backend}>
-      
-      //Mostrar encabezado pero sin el boton de crear partida
-      <Header timeLeft={timeLeft} showCreateButton={false}>
-      </Header>
+  // Función para resetear el estado del juego
+  const resetGameState = () => {
+    setTopColor(null);
+    setBottomColor(null);
+    setSymbol(null);
+    setSymbolPosition(null);
+    setNumber(null);
+    setNumberPosition(null);
+    setCurrentStep(1);
+    setIsSubmitting(false);
+    setHasSubmitted(false);
+    setSubmissionStatus(null);
+    setShowSuccessAnimation(false);
+    setProgressPercentage(0);
+  };
 
-      <div className={styles.gameWrapper}>
+  // Auto-submit cuando se agota el tiempo
+  const handleAutoSubmit = () => {
+    if (hasSubmitted) return;
+    
+    setIsSubmitting(true);
+    setHasSubmitted(true);
+    setSubmissionStatus('waiting');
+
+    const answer = {
+      topColor: topColor,
+      bottomColor: bottomColor,
+      symbol: symbol,
+      symbolPosition: symbolPosition,
+      number: number,
+      numberPosition: numberPosition,
+      character: selectedCharacter,
+      submittedAt: Date.now(),
+      isAutoSubmit: true
+    };
+
+    const pin = localStorage.getItem("gamePin");
+    const username = localStorage.getItem("username");
+
+    socket.emit("submit-answer", { 
+      pin: pin,
+      username: username,
+      answer: answer 
+    });
+
+    console.log("Respuesta auto-enviada (tiempo agotado):", answer);
+  };
+
+  // Función para enviar respuesta manual
+  const submitAnswer = () => {
+    if (hasSubmitted || isSubmitting) return;
+    
+    setIsSubmitting(true);
+    setHasSubmitted(true);
+    setSubmissionStatus('waiting');
+
+    const answer = {
+      topColor: topColor,
+      bottomColor: bottomColor,
+      symbol: symbol,
+      symbolPosition: symbolPosition,
+      number: number,
+      numberPosition: numberPosition,
+      character: selectedCharacter,
+      submittedAt: Date.now(),
+      isAutoSubmit: false
+    };
+
+    const pin = localStorage.getItem("gamePin");
+    const username = localStorage.getItem("username");
+
+    socket.emit("submit-answer", { 
+      pin: pin,
+      username: username,
+      answer: answer 
+    });
+
+    console.log("Respuesta enviada manualmente:", answer);
+  };
+
+  // Verificar si puede enviar respuesta
+  const canSubmit = () => {
+    return topColor && bottomColor && symbol && !hasSubmitted && !isSubmitting;
+  };
+
+  return (
+    <DndProvider backend={HTML5Backend}>
+      <Header 
+        timeLeft={timeLeft} 
+        showCreateButton={false}
+        selectedCharacter={selectedCharacter}
+      />
+
+      <div className={`${styles.gameWrapper} ${hasSubmitted ? styles.submitted : ''}`}>
+        {/* Success Animation Overlay */}
+        {showSuccessAnimation && (
+          <div className={styles.successOverlay}>
+            <div className={styles.successAnimation}>
+              <CheckCircle size={64} />
+              <h2>¡Respuesta Enviada!</h2>
+              <p>Esperando siguiente pregunta...</p>
+            </div>
+          </div>
+        )}
+
         <div className={styles.gameContainer}>
-          <div className={styles.questionContainer}>
-            <h2>{question ? question.title : "Esperando pregunta..."}</h2>
+          {/* Enhanced Question Header */}
+          <div className={styles.questionHeader}>
+            <div className={styles.questionInfo}>
+              <h2 className={styles.questionTitle}>
+                {question ? question.title : gameHasStarted ? "Preparando siguiente pregunta..." : "Esperando pregunta..."}
+              </h2>
+              
+              {question && (
+                <div className={styles.questionMeta}>
+                  <div className={styles.timeIndicator}>
+                    <Clock size={16} />
+                    <span className={timeLeft <= 10 ? styles.timeUrgent : ''}>
+                      {timeLeft}s restantes
+                    </span>
+                  </div>
+                  
+                  <div className={styles.progressIndicator}>
+                    <Target size={16} />
+                    <span>Progreso: {progressPercentage}%</span>
+                    <div className={styles.progressBar}>
+                      <div 
+                        className={styles.progressFill}
+                        style={{ width: `${progressPercentage}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Character Indicator */}
+            {selectedCharacter && (
+              <div className={styles.characterBadge}>
+                <img 
+                  src={selectedCharacter.image} 
+                  alt={selectedCharacter.name}
+                  className={styles.characterAvatar}
+                />
+                <div className={styles.characterInfo}>
+                  <span className={styles.characterName}>{selectedCharacter.name}</span>
+                  <span className={styles.characterSpecialty}>{selectedCharacter.specialty}</span>
+                </div>
+              </div>
+            )}
           </div>
 
-          <main className="designerLayout">
-            <section className="previewSection">
-              <LivePreviewRombo
-                topColorOption={topColor}
-                bottomColorOption={bottomColor}
-                symbolOption={symbol}
-                symbolPosition={symbolPosition}
-                number={number}
-                numberPosition={numberPosition}
-                onTopColorDrop={handleTopColorDrop}
-                onBottomColorDrop={handleBottomColorDrop}
-                onSymbolDrop={handleSymbolDrop}
-                onNumberDrop={handleNumberDrop}
-              />
+          <main className={styles.gameLayout}>
+            {/* Preview Section */}
+            <section className={styles.previewSection}>
+              <div className={styles.previewCard}>
+                <h3 className={styles.sectionTitle}>
+                  <Zap size={20} />
+                  Tu Pictograma
+                </h3>
+                
+                <LivePreviewRombo
+                  topColorOption={topColor}
+                  bottomColorOption={bottomColor}
+                  symbolOption={symbol}
+                  symbolPosition={symbolPosition}
+                  number={number}
+                  numberPosition={numberPosition}
+                  onTopColorDrop={handleTopColorDrop}
+                  onBottomColorDrop={handleBottomColorDrop}
+                  onSymbolDrop={handleSymbolDrop}
+                  onNumberDrop={handleNumberDrop}
+                />
+
+                {/* Submit Button */}
+                <div className={styles.submitSection}>
+                  <button 
+                    className={`${styles.submitButton} ${
+                      canSubmit() ? styles.canSubmit : styles.cannotSubmit
+                    } ${submissionStatus === 'waiting' ? styles.waiting : ''}`}
+                    onClick={submitAnswer}
+                    disabled={!canSubmit() || isSubmitting}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <div className={styles.spinner} />
+                        Enviando...
+                      </>
+                    ) : hasSubmitted ? (
+                      <>
+                        <CheckCircle size={20} />
+                        ¡Enviado!
+                      </>
+                    ) : canSubmit() ? (
+                      <>
+                        <Send size={20} />
+                        Enviar Respuesta
+                      </>
+                    ) : (
+                      <>
+                        <AlertCircle size={20} />
+                        Completa el pictograma
+                      </>
+                    )}
+                  </button>
+
+                  {/* Status Messages */}
+                  {submissionStatus === 'success' && (
+                    <div className={styles.statusMessage}>
+                      <CheckCircle size={16} />
+                      ¡Respuesta recibida correctamente!
+                    </div>
+                  )}
+                  
+                  {submissionStatus === 'error' && (
+                    <div className={styles.statusMessage}>
+                      <AlertCircle size={16} />
+                      Error al enviar. Intenta de nuevo.
+                    </div>
+                  )}
+                  
+                  {hasSubmitted && submissionStatus === 'waiting' && (
+                    <div className={styles.statusMessage}>
+                      <Clock size={16} />
+                      Esperando siguiente pregunta...
+                    </div>
+                  )}
+                </div>
+              </div>
             </section>
 
-            <section className="controlsSection">
-              {currentStep === 1 && (
-                <ColorPicker colors={solidColors} title="Paso 1: Arrastra Colores (Superior / Inferior)" />
+            {/* Controls Section */}
+            <section className={styles.controlsSection}>
+              {currentStep === 1 && question && (
+                <div className={styles.controlCard}>
+                  <ColorPicker 
+                    colors={solidColors} 
+                    title="Paso 1: Arrastra Colores (Superior / Inferior)" 
+                    disabled={hasSubmitted}
+                  />
+                </div>
               )}
 
-              {currentStep === 2 && (
-                <LogoPicker symbols={availableSymbols} title="Paso 2: Arrastra un Símbolo (Arriba / Abajo)" />
+              {currentStep === 2 && question && (
+                <div className={styles.controlCard}>
+                  <LogoPicker 
+                    symbols={availableSymbols} 
+                    title="Paso 2: Arrastra un Símbolo (Arriba / Abajo)" 
+                    disabled={hasSubmitted}
+                  />
+                </div>
               )}
 
-              {currentStep === 3 && (
-                <NumberPicker numbers={availableNumbers} title="Paso 3: Arrastra un Número (Superior / Inferior)" />
+              {currentStep === 3 && question && (
+                <div className={styles.controlCard}>
+                  <NumberPicker 
+                    numbers={availableNumbers} 
+                    title="Paso 3: Arrastra un Número (Superior / Inferior)" 
+                    disabled={hasSubmitted}
+                  />
+                </div>
               )}
 
-              {currentStep === 4 && (
-                <div className="summarySection">
-                  <h2>¡Pictograma Configurado!</h2>
-                  <p><strong>Color Superior:</strong> {topColor?.name || 'No seleccionado'}</p>
-                  <p><strong>Color Inferior:</strong> {bottomColor?.name || 'No seleccionado'}</p>
-                  <p><strong>Símbolo:</strong> {symbol?.name || 'No seleccionado'} ({symbolPosition || 'N/A'})</p>
-                  <p><strong>Número:</strong> {number || 'Ninguno'} ({numberPosition || 'N/A'})</p>
+              {currentStep === 4 && !hasSubmitted && question && (
+                <div className={styles.controlCard}>
+                  <div className={styles.summarySection}>
+                    <h3>
+                      <Trophy size={20} />
+                      ¡Pictograma Listo!
+                    </h3>
+                    <div className={styles.summaryGrid}>
+                      <div className={styles.summaryItem}>
+                        <span className={styles.summaryLabel}>Color Superior:</span>
+                        <span className={styles.summaryValue}>{topColor?.name || 'No seleccionado'}</span>
+                      </div>
+                      <div className={styles.summaryItem}>
+                        <span className={styles.summaryLabel}>Color Inferior:</span>
+                        <span className={styles.summaryValue}>{bottomColor?.name || 'No seleccionado'}</span>
+                      </div>
+                      <div className={styles.summaryItem}>
+                        <span className={styles.summaryLabel}>Símbolo:</span>
+                        <span className={styles.summaryValue}>
+                          {symbol?.name || 'No seleccionado'} ({symbolPosition || 'N/A'})
+                        </span>
+                      </div>
+                      <div className={styles.summaryItem}>
+                        <span className={styles.summaryLabel}>Número:</span>
+                        <span className={styles.summaryValue}>
+                          {number || 'Ninguno'} ({numberPosition || 'N/A'})
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* MODIFICADO: Waiting State - Solo mostrar si el juego nunca ha iniciado */}
+              {!question && !gameHasStarted && (
+                <div className={styles.waitingCard}>
+                  <div className={styles.waitingContent}>
+                    <Clock size={48} />
+                    <h3>Esperando pregunta...</h3>
+                    <p>El administrador iniciará el juego pronto</p>
+                    <div className={styles.waitingSpinner} />
+                  </div>
+                </div>
+              )}
+
+              {/* NUEVO: Estado entre preguntas - Cuando el juego ya inició pero no hay pregunta actual */}
+              {!question && gameHasStarted && (
+                <div className={styles.waitingCard}>
+                  <div className={styles.waitingContent}>
+                    <Clock size={48} />
+                    <h3>Preparando siguiente pregunta...</h3>
+                    <p>El juego continuará en breve</p>
+                    <div className={styles.waitingSpinner} />
+                  </div>
                 </div>
               )}
             </section>
