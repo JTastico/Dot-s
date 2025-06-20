@@ -11,6 +11,13 @@ const playerSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
+  // NUEVO: Agregar información del personaje
+  character: {
+    id: Number,
+    name: String,
+    image: String,
+    specialty: String
+  },
   answers: [
     {
       questionId: {

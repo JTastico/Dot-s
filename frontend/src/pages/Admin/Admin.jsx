@@ -154,24 +154,28 @@ export default function Admin() {
 
   // Funciones originales del juego
   const handleCrearJuego = () => {
-    if (selectedQuestions.length === 0) {
-      alert("Por favor, selecciona al menos una pregunta antes de crear el juego.");
-      return;
-    }
+  if (selectedQuestions.length === 0) {
+    alert("Por favor, selecciona al menos una pregunta antes de crear el juego.");
+    return;
+  }
 
-    socket.emit("create-game", { 
-      timeLimit: parseInt(tiempoJuego), 
-      questionIds: selectedQuestions 
-    }, (response) => {
-      if (response.success) {
-        setCodigo(response.pin);
-        setTiempo(tiempoJuego);
-        setJuegoCreado(true);
-      } else {
-        alert(response.error || "Error al crear el juego");
-      }
-    });
-  };
+  console.log(`Admin: Creando juego con ${selectedQuestions.length} preguntas:`, selectedQuestions);
+
+  socket.emit("create-game", { 
+    timeLimit: parseInt(tiempoJuego), 
+    questionIds: selectedQuestions 
+  }, (response) => {
+    if (response.success) {
+      setCodigo(response.pin);
+      setTiempo(tiempoJuego);
+      setJuegoCreado(true);
+      console.log(`Admin: Juego creado con PIN ${response.pin}`);
+    } else {
+      alert(response.error || "Error al crear el juego");
+      console.error("Error al crear juego:", response.error);
+    }
+  });
+};
 
   const handleIniciarJuego = () => {
     setEsperandoResultados(true);

@@ -54,21 +54,54 @@ const LivePreviewRombo = ({
     }),
   }));
 
-  const topColor = topColorOption?.value || 'transparent';
-  const bottomColor = bottomColorOption?.value || 'transparent';
+  const topBackground = topColorOption?.type === 'pattern'
+    ? `linear-gradient(to bottom, ${topColorOption.value} 0%, ${topColorOption.value} 50%, transparent 50%, transparent 100%)`
+    : topColorOption?.value || 'transparent';
+
+  const bottomBackground = bottomColorOption?.type === 'pattern'
+    ? `linear-gradient(to top, ${bottomColorOption.value} 0%, ${bottomColorOption.value} 50%, transparent 50%, transparent 100%)`
+    : bottomColorOption?.value || 'transparent';
+
+  const combinedBackground = 
+    topColorOption?.type === 'pattern' || bottomColorOption?.type === 'pattern'
+      ? `${topBackground}, ${bottomBackground}`
+      : `linear-gradient(to bottom, ${topBackground} 0%, ${topBackground} 50%, ${bottomBackground} 50%, ${bottomBackground} 100%)`;
 
   const romboInnerStyles = {
     width: 'min(40vw, 360px)',
     height: 'min(40vw, 360px)',
     clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)',
-    background: `linear-gradient(to bottom, ${topColor} 0%, ${topColor} 50%, ${bottomColor} 50%, ${bottomColor} 100%)`,
     position: 'relative',
     display: 'flex',
     flexDirection: 'column',
     boxSizing: 'border-box',
     border: '2px solid transparent',
     transition: 'box-shadow 0.3s ease',
+    background: '',
   };
+
+  const backgroundLayers = [];
+
+  // TOP background
+  if (topColorOption) {
+    if (topColorOption.type === 'pattern') {
+      backgroundLayers.push(`${topColorOption.value} top / 100% 50% no-repeat`);
+    } else {
+      backgroundLayers.push(`linear-gradient(to bottom, ${topColorOption.value} 0%, ${topColorOption.value} 50%, transparent 50%, transparent 100%)`);
+    }
+  }
+
+  // BOTTOM background
+  if (bottomColorOption) {
+    if (bottomColorOption.type === 'pattern') {
+      backgroundLayers.push(`${bottomColorOption.value} bottom / 100% 50% no-repeat`);
+    } else {
+      backgroundLayers.push(`linear-gradient(to top, ${bottomColorOption.value} 0%, ${bottomColorOption.value} 50%, transparent 50%, transparent 100%)`);
+    }
+  }
+
+  // Combine layers
+  romboInnerStyles.background = backgroundLayers.join(', ');
 
   if (!topColorOption && !bottomColorOption) {
     romboInnerStyles.backgroundColor = 'lightgrey';
@@ -116,12 +149,7 @@ const LivePreviewRombo = ({
   const logoStyles = {
     position: 'absolute',
     left: '50%',
-    top:
-      symbolPosition === 'top'
-        ? '35%'
-        : symbolPosition === 'bottom'
-        ? '40%'
-        : '50%',
+    top: symbolPosition === 'top' ? '35%' : symbolPosition === 'bottom' ? '40%' : '50%',
     bottom: symbolPosition === 'bottom' ? '25%' : 'unset',
     transform: symbolPosition === 'bottom' ? 'translate(-50%, 50%)' : 'translate(-50%, -50%)',
     width: '28%',
@@ -129,15 +157,13 @@ const LivePreviewRombo = ({
     maxHeight: '32%',
     objectFit: 'contain',
     pointerEvents: 'none',
-    zIndex: 10,
+    zIndex: 20,
     transition: 'top 0.3s ease, bottom 0.3s ease, transform 0.3s ease',
     filter: 'drop-shadow(0px 3px 3px rgba(0, 0, 0, 0.35))',
   };
 
   const numberTextColor =
-  bottomColorOption?.value?.toLowerCase() === '#000000'
-    ? '#FFFFFF'
-    : '#000000';
+    bottomColorOption?.value?.toLowerCase() === '#000000' ? '#FFFFFF' : '#000000';
 
   const numberStyles = {
     position: 'absolute',
@@ -147,8 +173,8 @@ const LivePreviewRombo = ({
     fontSize: '2em',
     color: numberTextColor,
     textShadow: '1px 1px 2px rgba(0,0,0,0.25)',
-    zIndex: 10,
-    ...(numberPosition === 'top' ? { top: '8%' } : { bottom: '8%' })
+    zIndex: 20,
+    ...(numberPosition === 'top' ? { top: '8%' } : { bottom: '8%' }),
   };
 
   const isEmpty = !topColorOption && !bottomColorOption && !symbolOption && !number;
@@ -157,7 +183,7 @@ const LivePreviewRombo = ({
     <div className="rombo-container">
       <div className="rombo-outer">
         <div className={styles['rombo-inner']} style={romboInnerStyles}>
-        <div className="rombo-border-inner" />
+          <div className="rombo-border-inner" />
           <div ref={dropTopRef} style={topDropZoneStyles}>
             {isEmpty && !isOverTop && !isOverBottom && (
               <span className="rombo-drop-hint">

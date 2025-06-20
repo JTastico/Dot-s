@@ -10,16 +10,26 @@ import Layout from "./layouts/layout/Layout";
 import Game from "./pages/Game/Game";
 import JoinGame from "./pages/Home/JoinGame";
 import GameResults from "./pages/GameResults/GameResults";
+import CharacterSelection from './pages/CharacterSelection/CharacterSelection';
+import WaitingRoom from './pages/WaitingRoom/WaitingRoom'; // NUEVA IMPORTACIÓN
 
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <Home />,  // ✅ SIN Layout wrapper
+    element: <Home />,
     errorElement: <NotFound />
   },
   {
     path: '/join',
-    element: <JoinGame />  // ✅ SIN Layout wrapper
+    element: <JoinGame />
+  },
+  {
+    path: '/character-selection',
+    element: <CharacterSelection />
+  },
+  {
+    path: '/waiting-room', // NUEVA RUTA
+    element: <WaitingRoom />
   },
   {
     path: '/login',
@@ -39,11 +49,11 @@ const router = createBrowserRouter([
   },
   {
     path: '/admin',
-    element: <Admin />  // ✅ Ya sin Layout
+    element: <Admin />
   },
   {
     path: '/game',
-    element: <Game />  // ✅ Ya sin Layout
+    element: <Game />
   },
   {
     path: '/game-results',
