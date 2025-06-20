@@ -246,6 +246,15 @@ export default function Game() {
     };
   }, [navigate]);
 
+<<<<<<< HEAD
+  return (
+    
+    <DndProvider backend={HTML5Backend}>
+      
+      {/*Mostrar encabezado pero sin el boton de crear partida*/}
+      <Header timeLeft={timeLeft} showCreateButton={false}>
+      </Header>
+=======
   // Función para resetear el estado del juego
   const resetGameState = () => {
     setTopColor(null);
@@ -362,6 +371,7 @@ export default function Game() {
             </div>
           </div>
         )}
+>>>>>>> master
 
         <div className={styles.gameContainer}>
           {/* Enhanced Question Header */}
@@ -415,6 +425,27 @@ export default function Game() {
             )}
           </div>
 
+<<<<<<< HEAD
+          <main className={styles.designerLayout}>
+            <section className="previewSection">
+              <LivePreviewRombo
+                topColorOption={topColor}
+                bottomColorOption={bottomColor}
+                symbolOption={symbol}
+                symbolPosition={symbolPosition}
+                number={number}
+                numberPosition={numberPosition}
+                onTopColorDrop={handleTopColorDrop}
+                onBottomColorDrop={handleBottomColorDrop}
+                onSymbolDrop={handleSymbolDrop}
+                onNumberDrop={handleNumberDrop}
+              />
+            </section>
+
+            <section className={styles.controlsSection}>
+              {currentStep === 1 && (
+                <ColorPicker colors={solidColors} title="Paso 1: Arrastra Colores (Superior / Inferior)" />
+=======
           <main className={styles.gameLayout}>
             {/* Preview Section */}
             <section className={styles.previewSection}>
@@ -449,6 +480,7 @@ export default function Game() {
                     disabled={hasSubmitted}
                   />
                 </div>
+>>>>>>> master
               )}
 
               {currentStep === 2 && question && (
@@ -471,6 +503,15 @@ export default function Game() {
                 </div>
               )}
 
+<<<<<<< HEAD
+              {currentStep === 4 && (
+                <div className={styles.summarySection}>
+                  <h2>¡Pictograma Configurado!</h2>
+                  <p><strong>Color Superior:</strong> {topColor?.name || 'No seleccionado'}</p>
+                  <p><strong>Color Inferior:</strong> {bottomColor?.name || 'No seleccionado'}</p>
+                  <p><strong>Símbolo:</strong> {symbol?.name || 'No seleccionado'} ({symbolPosition || 'N/A'})</p>
+                  <p><strong>Número:</strong> {number || 'Ninguno'} ({numberPosition || 'N/A'})</p>
+=======
               {currentStep === 4 && !hasSubmitted && question && (
                 <div className={styles.controlCard}>
                   <div className={styles.summarySection}>
@@ -525,6 +566,7 @@ export default function Game() {
                     <p>La siguiente pregunta aparecerá en breve</p>
                     <div className={styles.waitingSpinner} />
                   </div>
+>>>>>>> master
                 </div>
               )}
             </section>

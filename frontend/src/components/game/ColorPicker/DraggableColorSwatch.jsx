@@ -17,8 +17,8 @@ const DraggableColorSwatch = ({ colorOption }) => {
   const isPattern = colorOption.type === 'pattern';
 
   const swatchStyle = {
-    width: '100px',
-    height: '140px',
+    width: '80px',
+    height: '120px',
     borderRadius: '10px',
     border: '2px solid #ddd',
     display: 'flex',

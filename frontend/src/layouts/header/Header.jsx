@@ -1,12 +1,17 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import styles from "./Header.module.css";
 import logo from "../../assets/images/logo.png";
 import { Gamepad2, Users } from "lucide-react";
 
+<<<<<<< HEAD
+export default function Header({ children, timeLeft, showCreateButton = true }) {
+  const navigate = useNavigate();
+=======
 export default function Header({ children, timeLeft, showCreateButton = true, selectedCharacter }) {
+>>>>>>> master
   const handleCreateGame = () => {
-    //lógica para crear una partida
-    console.log("Crear partida clickeado");
+    navigate("/admin");
   };
 
   return (

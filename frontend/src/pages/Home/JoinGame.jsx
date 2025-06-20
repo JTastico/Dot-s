@@ -49,6 +49,29 @@ export default function JoinGame() {
   const gamePin = localStorage.getItem("gamePin");
 
   return (
+<<<<<<< HEAD
+    <div className={styles.joinPageContainer}> {/*nuevo contenedor*/}
+      <div className={styles.joinWrapper}>
+        {loading && (
+          <div className={styles.loadingOverlay}>
+            <div className={styles.spinner}></div>
+            <p>Conectando al juego...</p>
+          </div>
+        )}
+        <div className={styles.joinContainer}>
+          <img src={logo} alt="logo" />
+          <h1>Unirse al Juego</h1>
+        </div>
+        <Input
+          placeholder="Tu nombre"
+          buttonText="Comenzar"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          onSubmit={handleSubmit}
+          disabled={loading}
+        />
+        {error && <p className={styles.error}>{error}</p>}
+=======
     <div className={styles.joinWrapper}>
       {/* Loading Overlay */}
       {loading && (
@@ -170,6 +193,7 @@ export default function JoinGame() {
         {[...Array(6)].map((_, i) => (
           <div key={i} className={`${styles.particle} ${styles[`particle${i + 1}`]}`}></div>
         ))}
+>>>>>>> master
       </div>
     </div>
   );
