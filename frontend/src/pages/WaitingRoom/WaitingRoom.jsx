@@ -30,7 +30,7 @@ export default function WaitingRoom() {
     try {
       const character = JSON.parse(characterData);
       setCurrentUser({ username, character });
-      
+
       // Obtener información del juego
       setGameInfo({
         pin: gamePin,
@@ -67,7 +67,7 @@ export default function WaitingRoom() {
     socket.on("game-started", (data) => {
       console.log("Juego iniciado:", data);
       setTransitionPhase('starting');
-      
+
       // Transición suave antes de navegar
       setTimeout(() => {
         setTransitionPhase('transitioning');
@@ -128,7 +128,7 @@ export default function WaitingRoom() {
     if (countdown > 0) {
       const timer = setTimeout(() => {
         setCountdown(countdown - 1);
-        
+
         // Efectos especiales en los últimos 3 segundos
         if (countdown <= 3) {
           // Aquí podrías agregar efectos de sonido
@@ -144,13 +144,13 @@ export default function WaitingRoom() {
   const leaveGame = () => {
     const gamePin = localStorage.getItem("gamePin");
     const username = localStorage.getItem("username");
-    
+
     socket.emit("leave-game", { pin: gamePin, username });
-    
+
     localStorage.removeItem("username");
     localStorage.removeItem("selectedCharacter");
     localStorage.removeItem("gamePin");
-    
+
     navigate("/");
   };
 
@@ -187,14 +187,14 @@ export default function WaitingRoom() {
                 </div>
                 <p>Prepárate para la aventura...</p>
                 <div className={styles.countdownProgress}>
-                  <div 
+                  <div
                     className={styles.progressBar}
                     style={{ width: `${((5 - countdown) / 5) * 100}%` }}
                   ></div>
                 </div>
               </>
             )}
-            
+
             {transitionPhase === 'starting' && (
               <>
                 <div className={styles.startingIcon}>
@@ -205,7 +205,7 @@ export default function WaitingRoom() {
                 <p>Cargando preguntas y configuración...</p>
               </>
             )}
-            
+
             {transitionPhase === 'transitioning' && (
               <>
                 <div className={styles.transitionIcon}>
@@ -241,13 +241,13 @@ export default function WaitingRoom() {
             </div>
           </div>
         </div>
-        
+
         <div className={styles.gameInfo}>
           <div className={styles.pinDisplay}>
             PIN: <span>{gameInfo.pin}</span>
           </div>
-          <button 
-            className={styles.leaveButton} 
+          <button
+            className={styles.leaveButton}
             onClick={leaveGame}
             disabled={isGameStarting}
           >
@@ -287,7 +287,7 @@ export default function WaitingRoom() {
               </div>
             </div>
           </div>
-          
+
           {isHost && (
             <div className={styles.hostControls}>
               <div className={styles.hostBadge}>
@@ -295,8 +295,8 @@ export default function WaitingRoom() {
                 Eres el anfitrión
               </div>
               <p className={styles.hostInfo}>
-                {isGameStarting 
-                  ? "¡El juego está comenzando!" 
+                {isGameStarting
+                  ? "¡El juego está comenzando!"
                   : "El juego comenzará automáticamente cuando el administrador lo inicie desde su panel."
                 }
               </p>
@@ -315,11 +315,10 @@ export default function WaitingRoom() {
 
           <div className={`${styles.playersGrid} ${isGameStarting ? styles.gameStarting : ''}`}>
             {players.map((player, index) => (
-              <div 
-                key={`${player.username}-${index}`} 
-                className={`${styles.playerCard} ${
-                  currentUser?.username === player.username ? styles.currentUser : ''
-                } ${index === 0 ? styles.host : ''} ${isGameStarting ? styles.ready : ''}`}
+              <div
+                key={`${player.username}-${index}`}
+                className={`${styles.playerCard} ${currentUser?.username === player.username ? styles.currentUser : ''
+                  } ${index === 0 ? styles.host : ''} ${isGameStarting ? styles.ready : ''}`}
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 {index === 0 && (
@@ -327,15 +326,15 @@ export default function WaitingRoom() {
                     <Crown size={14} />
                   </div>
                 )}
-                
+
                 {currentUser?.username === player.username && (
                   <div className={styles.youIndicator}>Tú</div>
                 )}
 
                 <div className={styles.playerAvatar}>
                   {player.character && player.character.image ? (
-                    <img 
-                      src={player.character.image} 
+                    <img
+                      src={player.character.image}
                       alt={player.character.name || 'Avatar'}
                       className={styles.avatarImage}
                       onError={(e) => {
