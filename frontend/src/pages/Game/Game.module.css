@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 html, body {
   margin: 0;
   padding: 0;
@@ -8,7 +8,7 @@ html, body {
 }
 
 /* Fondo animado, efecto neón */
-=======
+
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
 
 /* Reset y configuración global */
@@ -19,26 +19,26 @@ html, body {
 }
 
 /* Game Wrapper - Fondo mejorado */
->>>>>>> master
+
 .gameWrapper {
   min-height: 100vh;
   width: 100vw;
-<<<<<<< HEAD
+
   background: linear-gradient(270deg, #000000, #1a0033, #2d1b69, #1a0033, #000000);
   background-size: 600% 600%;
   animation: waterFlow 15s ease-in-out infinite;
-=======
+
   height: 100vh;
   background: linear-gradient(270deg, #0f172a, #1e1b4b, #312e81, #1e1b4b, #0f172a);
   background-size: 400% 400%;
   animation: gameBackground 20s ease-in-out infinite;
->>>>>>> master
+
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 2rem;
   box-sizing: border-box;
-<<<<<<< HEAD
+
   overflow-x: hidden;
   padding-top: 90px;
 }
@@ -65,7 +65,7 @@ html, body {
 
 /* Cabecera central */
 .questionContainer {
-=======
+
   font-family: 'Poppins', sans-serif;
   position: relative;
   overflow: hidden;
@@ -151,7 +151,7 @@ html, body {
 /* Question Container - Unificado */
 .questionContainer,
 .questionHeader {
->>>>>>> master
+
   text-align: center;
   margin-bottom: 2rem;
   padding: 1.5rem;
@@ -160,21 +160,20 @@ html, body {
   border: 1px solid rgba(139, 92, 246, 0.2);
 }
 
-<<<<<<< HEAD
+
 .questionContainer h2 {
   font-size: 1.9rem;
   color: #c084fc;
   text-shadow: 0 0 10px #a855f7;
   margin-bottom: 0.5rem;
-=======
-.questionContainer h2,
+}
 .questionTitle {
   font-size: 2rem;
   color: #1e293b;
   margin-bottom: 1rem;
   font-weight: 700;
   line-height: 1.2;
->>>>>>> master
+
 }
 
 .questionContainer p {
@@ -311,11 +310,11 @@ html, body {
   flex-wrap: wrap;
 }
 
-<<<<<<< HEAD
+
 /*sección del rombo */
-=======
+
 /* Preview Section */
->>>>>>> master
+
 .previewSection {
   display: flex;
   flex-direction: column;
@@ -324,9 +323,9 @@ html, body {
   min-width: 280px;
 }
 
-<<<<<<< HEAD
+
 /*sección de controles */
-=======
+
 .previewCard {
   background: linear-gradient(135deg, rgba(139, 92, 246, 0.05), rgba(16, 185, 129, 0.03));
   border: 1px solid rgba(139, 92, 246, 0.2);
@@ -365,14 +364,14 @@ html, body {
 }
 
 /* Controls Section */
->>>>>>> master
+
 .controlsSection {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
   overflow-y: auto;
-<<<<<<< HEAD
+
   padding-right: 1rem;
   min-width: 280px;
 }
@@ -547,7 +546,7 @@ html, body {
   .summarySection p {
     font-size: 0.88rem;
   }
-=======
+
 }
 
 .controlCard {
@@ -655,7 +654,7 @@ html, body {
   font-family: inherit;
   position: relative;
   overflow: hidden;
->>>>>>> master
+
 }
 
 .submitButton::before,
