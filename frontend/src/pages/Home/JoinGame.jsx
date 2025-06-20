@@ -35,26 +35,28 @@ export default function JoinGame() {
   };
 
   return (
-    <div className={styles.joinWrapper}>
-      {loading && (
-        <div className={styles.loadingOverlay}>
-          <div className={styles.spinner}></div>
-          <p>Conectando al juego...</p>
+    <div className={styles.joinPageContainer}> {/*nuevo contenedor*/}
+      <div className={styles.joinWrapper}>
+        {loading && (
+          <div className={styles.loadingOverlay}>
+            <div className={styles.spinner}></div>
+            <p>Conectando al juego...</p>
+          </div>
+        )}
+        <div className={styles.joinContainer}>
+          <img src={logo} alt="logo" />
+          <h1>Unirse al Juego</h1>
         </div>
-      )}
-      <div className={styles.joinContainer}>
-        <img src={logo} alt="logo" />
-        <h1>Unirse al Juego</h1>
+        <Input
+          placeholder="Tu nombre"
+          buttonText="Comenzar"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          onSubmit={handleSubmit}
+          disabled={loading}
+        />
+        {error && <p className={styles.error}>{error}</p>}
       </div>
-      <Input
-        placeholder="Tu nombre"
-        buttonText="Comenzar"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-        onSubmit={handleSubmit}
-        disabled={loading} // Deshabilitar botón si está cargando
-      />
-      {error && <p className={styles.error}>{error}</p>}
     </div>
   );
 }

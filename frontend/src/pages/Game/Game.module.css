@@ -1,42 +1,62 @@
-/* Ocupa toda la pantalla */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: 'Segoe UI', sans-serif;
+  overflow-x: hidden;
+}
+
+/* Fondo animado, efecto neón */
 .gameWrapper {
+  min-height: 100vh;
   width: 100vw;
-  height: 100vh;
-  background-color: #0f172a;
+  background: linear-gradient(270deg, #000000, #1a0033, #2d1b69, #1a0033, #000000);
+  background-size: 600% 600%;
+  animation: waterFlow 15s ease-in-out infinite;
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 2rem;
   box-sizing: border-box;
+  overflow-x: hidden;
+  padding-top: 90px;
 }
 
-/* Contenedor central como una tarjeta */
+
+/* Tarjeta con borde neón */
 .gameContainer {
-  background-color: #f6f7fb;
+  background-color: rgba(10, 10, 25, 0.95);
+  border: 2px solid #6a0dad;
+  box-shadow: 0 0 20px #6a0dad, 0 0 40px #1a0033;
+  border-radius: 20px;
   width: 100%;
   max-width: 1100px;
-  height: 70vh;
-  border-radius: 16px;
+  height: 75vh;
   padding: 2rem 3rem;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
+  backdrop-filter: blur(5px);
+  animation: fadeIn 1s ease-out;
+  overflow: hidden;
+  margin: 0 auto;
 }
 
-/* Cabecera centrada */
+
+/* Cabecera central */
 .questionContainer {
   text-align: center;
   margin-bottom: 1.5rem;
 }
 
 .questionContainer h2 {
-  font-size: 1.75rem;
-  color: #1e293b;
+  font-size: 1.9rem;
+  color: #c084fc;
+  text-shadow: 0 0 10px #a855f7;
   margin-bottom: 0.5rem;
 }
 
 .questionContainer p {
-  color: #475569;
+  color: #e0e7ff;
   font-size: 1rem;
 }
 
@@ -44,19 +64,21 @@
 .designerLayout {
   flex: 1;
   display: flex;
-  gap: 3rem;
-  overflow: visible;
+  gap: 2rem;
+  overflow: hidden;
+  flex-wrap: wrap;
 }
 
-/* Sección del rombo */
+/*sección del rombo */
 .previewSection {
   flex: 1;
   display: flex;
   justify-content: center;
   align-items: center;
+  min-width: 280px;
 }
 
-/* Sección de controles (colores, símbolo, número) */
+/*sección de controles */
 .controlsSection {
   flex: 1.2;
   display: flex;
@@ -64,38 +86,178 @@
   justify-content: flex-start;
   align-items: center;
   overflow-y: auto;
-}
-
-/* Botón confirmar */
-.acceptButton {
-  text-align: center;
-  margin-top: 1.5rem;
-}
-
-.acceptButton button {
-  background-color: #2563eb;
-  color: white;
-  font-weight: bold;
-  padding: 12px 24px;
-  border-radius: 10px;
-  font-size: 1rem;
-  border: none;
-  cursor: pointer;
-  transition: background 0.3s ease;
-}
-
-.acceptButton button:hover {
-  background-color: #1e40af;
+  padding-right: 1rem;
+  min-width: 280px;
 }
 
 /* Resumen */
 .summarySection {
-  background-color: white;
-  padding: 1.5rem;
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  background-color: rgba(0, 0, 0, 0.4);
+  padding: 1.75rem;
+  border-radius: 12px;
+  border: 1px solid #6a00ff;
+  box-shadow: 
+    0 0 15px rgba(106, 0, 255, 0.8),
+    inset 0 0 15px rgba(106, 0, 255, 0.2);
   width: 100%;
   max-width: 500px;
-  margin-top: 2rem;
-  text-align: left;
+  margin: 2rem auto 0;
+  color: #f8fafc;
+  animation: fadeInUp 0.8s ease-out;
+  backdrop-filter: blur(8px) brightness(0.8);
+  text-align: center;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Efecto de borde neón más contrastado */
+.summarySection::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border-radius: 12px;
+  background: linear-gradient(45deg, #6a00ff, #9d4edd, #6a00ff); 
+  z-index: -1;
+  opacity: 0.8;
+  filter: brightness(0.9);
+}
+
+.summarySection h2 {
+  color: #ffffff;
+  text-shadow: 
+    0 0 10px #d946ef,
+    0 0 25px rgba(217, 70, 239, 0.5);
+  margin-bottom: 1.25rem;
+  font-size: 1.6rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  position: relative;
+}
+
+.summarySection p {
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: rgba(235, 235, 245, 0.915); 
+  display: flex;
+  justify-content: space-between;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.summarySection p strong {
+  color: #b388ff;
+  font-weight: 500;
+  margin-right: 0.5rem;
+  text-shadow: 0 0 5px rgba(179, 136, 255, 0.5); /* Sutil sombra neón */
+}
+
+/* Animaciones */
+@keyframes waterFlow {
+  0% { background-position: 0% 0%; }
+  20% { background-position: 30% 40%; }
+  40% { background-position: 70% 20%; }
+  60% { background-position: 90% 60%; }
+  80% { background-position: 40% 90%; }
+  100% { background-position: 0% 0%; }
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; transform: scale(0.95); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes fadeInUp {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------------- RESPONSIVE DESIGN ---------------- */
+
+@media (max-width: 1024px) {
+  .gameContainer {
+    padding: 1.5rem 2rem;
+    height: auto;
+  }
+
+  .designerLayout {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .controlsSection {
+    padding-right: 0;
+  }
+
+  .summarySection {
+    padding: 1.5rem;
+    margin-top: 1.75rem;
+  }
+  
+  .summarySection h2 {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .questionContainer h2 {
+    font-size: 1.5rem;
+  }
+
+  .gameContainer {
+    padding: 1rem;
+    height: auto;
+  }
+
+  .summarySection {
+    padding: 1.25rem;
+    margin-top: 1.5rem;
+    border-radius: 10px;
+    max-width: 100%;
+  }
+  
+  .summarySection h2 {
+    font-size: 1.4rem;
+    margin-bottom: 1rem;
+  }
+  
+  .summarySection p {
+    font-size: 0.95rem;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.25rem;
+  }
+  
+  .summarySection p strong {
+    margin-right: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .questionContainer h2 {
+    font-size: 1.3rem;
+  }
+
+  .questionContainer p{
+    font-size: 0.9rem;
+  }
+
+  .summarySection {
+    padding: 0.9rem;
+  }
+  
+  .summarySection h2 {
+    font-size: 1rem;
+    margin-bottom: 0.6rem;
+  }
+  
+  .summarySection p {
+    font-size: 0.88rem;
+  }
 }
