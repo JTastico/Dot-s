@@ -44,25 +44,30 @@ export default function Game() {
   const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
   const [progressPercentage, setProgressPercentage] = useState(0);
 
-  const solidColors = availableColors.filter((color) => color.type === 'solid');
+  const availableColorOptions = availableColors.filter(
+    (color) => color.type === 'solid' || color.type === 'pattern'
+  );
+
 
   const handleTopColorDrop = (color) => {
     if (hasSubmitted) return;
     
-    if (color.type !== 'solid') {
-      alert("Por favor, arrastra un color sólido para la parte superior.");
+    if (color.type !== 'solid' && color.type !== 'pattern') {
+      alert("Por favor, arrastra un color válido para la parte superior.");
       return;
     }
+
     setTopColor(color);
   };
 
   const handleBottomColorDrop = (color) => {
     if (hasSubmitted) return;
     
-    if (color.type !== 'solid') {
-      alert("Por favor, arrastra un color sólido para la parte inferior.");
+    if (color.type !== 'solid' && color.type !== 'pattern') {
+      alert("Por favor, arrastra un color válido para la parte superior.");
       return;
     }
+
     setBottomColor(color);
   };
 
@@ -447,7 +452,7 @@ export default function Game() {
               {currentStep === 1 && question && (
                 <div className={styles.controlCard}>
                   <ColorPicker 
-                    colors={solidColors} 
+                    colors={availableColorOptions} 
                     title="Paso 1: Arrastra Colores (Superior / Inferior)" 
                     disabled={hasSubmitted}
                   />

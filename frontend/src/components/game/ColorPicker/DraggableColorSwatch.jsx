@@ -14,7 +14,7 @@ const DraggableColorSwatch = ({ colorOption }) => {
   const isLightColor =
     colorOption.value === '#FFFFFF' || colorOption.value === '#FFFF00' || colorOption.value === 'lightgrey';
 
-  const isPattern = colorOption.type === 'pattern' && colorOption.value === 'striped';
+  const isPattern = colorOption.type === 'pattern';
 
   const swatchStyle = {
     width: '100px',
@@ -38,9 +38,7 @@ const DraggableColorSwatch = ({ colorOption }) => {
     userSelect: 'none',
     flex: '0 0 auto',
     backgroundColor: isPattern ? '#fff' : colorOption.value,
-    backgroundImage: isPattern
-      ? 'repeating-linear-gradient(45deg, #000 0px, #000 5px, #fff 5px, #fff 10px)'
-      : 'none',
+    backgroundImage: isPattern ? colorOption.value : 'none',
     backgroundSize: '20px 20px',
     backgroundRepeat: 'repeat',
   };

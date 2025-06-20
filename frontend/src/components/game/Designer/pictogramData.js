@@ -16,6 +16,18 @@ export const availableColors = [
   { id: 'yellow_solid', name: 'Amarillo', type: 'solid', value: '#FACC15' },
   { id: 'blue_solid', name: 'Azul', type: 'solid', value: '#2563EB' },
   { id: 'black_solid', name: 'Negro', type: 'solid', value: '#000000' },
+  {
+    id: 'black_stripes',
+    name: 'Rayas Negras',
+    type: 'pattern',
+    value: 'repeating-linear-gradient(90deg, #000000 0 25px, #FFFFFF 25px 50px)'
+  },
+  {
+    id: 'red_stripes',
+    name: 'Rayas Rojas',
+    type: 'pattern',
+    value: 'repeating-linear-gradient(90deg, #DC2626 0 25px, #FFFFFF 25px 50px)'
+  }
 ];
 
 export const availableSymbols = [
