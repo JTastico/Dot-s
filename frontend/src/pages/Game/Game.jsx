@@ -26,7 +26,7 @@ export default function Game() {
   const [timeLeft, setTimeLeft] = useState(null);
   const [selectedCharacter, setSelectedCharacter] = useState(null);
   
-  // NUEVO: Estado para saber si el juego ha iniciado alguna vez
+  // Estado para saber si el juego ha iniciado alguna vez
   const [gameHasStarted, setGameHasStarted] = useState(false);
 
   const [currentStep, setCurrentStep] = useState(1);
@@ -44,14 +44,18 @@ export default function Game() {
   const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
   const [progressPercentage, setProgressPercentage] = useState(0);
 
+  // Filtrar colores disponibles - incluir solid y pattern
   const availableColorOptions = availableColors.filter(
     (color) => color.type === 'solid' || color.type === 'pattern'
   );
 
+  // También tener disponibles solo los sólidos para casos específicos
+  const solidColors = availableColors.filter((color) => color.type === 'solid');
 
   const handleTopColorDrop = (color) => {
     if (hasSubmitted) return;
     
+    // Permitir tanto solid como pattern
     if (color.type !== 'solid' && color.type !== 'pattern') {
       alert("Por favor, arrastra un color válido para la parte superior.");
       return;
@@ -63,8 +67,9 @@ export default function Game() {
   const handleBottomColorDrop = (color) => {
     if (hasSubmitted) return;
     
+    // Permitir tanto solid como pattern
     if (color.type !== 'solid' && color.type !== 'pattern') {
-      alert("Por favor, arrastra un color válido para la parte superior.");
+      alert("Por favor, arrastra un color válido para la parte inferior.");
       return;
     }
 
@@ -129,6 +134,7 @@ export default function Game() {
 
   useEffect(() => {
     const pin = localStorage.getItem("gamePin");
+    const username = localStorage.getItem("username");
     
     // Cargar información del personaje seleccionado
     const characterData = localStorage.getItem("selectedCharacter");
@@ -143,37 +149,69 @@ export default function Game() {
     }
 
     // Verificar si el usuario viene del flujo correcto
-    const username = localStorage.getItem("username");
     if (!username || !pin) {
       console.log("Usuario no autenticado, redirigiendo al inicio");
       navigate("/");
       return;
     }
 
-    socket.emit("request-current-question", { pin }, (response) => {
-      if (response.success) {
-        setQuestion(response.question);
-        setTimeLeft(response.timeLeft);
-        setGameHasStarted(true); // NUEVO: Marcar que el juego ha iniciado
-        console.log("Pregunta cargada:", response.question);
-      } else {
-        console.log(response.error || "Esperando a que el juego inicie");
-        if (response.error && response.error.includes("No hay juego activo")) {
-          navigate("/waiting-room");
+    console.log(`Entrando al juego - PIN: ${pin}, Usuario: ${username}`);
+
+    // Marcar que el juego ya inició (vienen del countdown)
+    setGameHasStarted(true);
+
+    // Solicitar la pregunta actual al entrar
+    console.log("Solicitando pregunta actual al servidor...");
+    socket.emit("get-current-question", { pin }, (response) => {
+      console.log("Respuesta get-current-question:", response);
+
+      if (response && response.success) {
+        if (response.question) {
+          console.log("✅ Pregunta activa recibida:", response.question.title);
+          setQuestion(response.question);
+          setTimeLeft(response.timeLeft || 0);
+        } else {
+          console.log("⚠ No hay pregunta activa en este momento");
+          // Mantener gameHasStarted en true pero sin pregunta
         }
+      } else {
+        console.error("❌ Error obteniendo pregunta:", response?.error);
+        // Podrían estar entre preguntas
       }
     });
 
+    // También usar el método de respaldo para compatibilidad
+    socket.emit("request-current-question", { pin }, (response) => {
+      if (response.success && response.question && !question) {
+        setQuestion(response.question);
+        setTimeLeft(response.timeLeft);
+        setGameHasStarted(true);
+        console.log("Pregunta cargada (método respaldo):", response.question);
+      } else if (response.error && response.error.includes("No hay juego activo")) {
+        navigate("/waiting-room");
+      }
+    });
+
+    // Escuchar nueva pregunta (para cuando cambie)
     socket.on("game-started", ({ question, timeLimit }) => {
-      console.log("¡Juego iniciado desde sala de espera!");
+      console.log("🎯 Nueva pregunta recibida via game-started:", question.title);
       resetGameState();
       setQuestion(question);
       setTimeLeft(timeLimit);
-      setGameHasStarted(true); // NUEVO: Marcar que el juego ha iniciado
+      setGameHasStarted(true);
+    });
+
+    // Escuchar siguiente pregunta
+    socket.on("next-question", ({ question, timeLimit }) => {
+      console.log("🎯 Siguiente pregunta recibida:", question.title);
+      resetGameState();
+      setQuestion(question);
+      setTimeLeft(timeLimit);
+      setGameHasStarted(true);
     });
 
     socket.on("game-ended", ({ results }) => {
-      console.log("Juego terminado, redirigiendo a resultados");
+      console.log("🏁 Juego terminado, redirigiendo a resultados");
       localStorage.removeItem("selectedCharacter");
       localStorage.removeItem("username");
       navigate("/game-results", { state: { results } });
@@ -184,14 +222,6 @@ export default function Game() {
       localStorage.removeItem("selectedCharacter");
       localStorage.removeItem("username");
       navigate("/");
-    });
-
-    socket.on("next-question", ({ question, timeLimit }) => {
-      console.log("Nueva pregunta recibida:", question);
-      resetGameState();
-      setQuestion(question);
-      setTimeLeft(timeLimit);
-      setGameHasStarted(true); // NUEVO: Asegurar que está marcado como iniciado
     });
 
     // Escuchar confirmación de respuesta
@@ -209,9 +239,9 @@ export default function Game() {
 
     return () => {
       socket.off("game-started");
+      socket.off("next-question");
       socket.off("game-ended");
       socket.off("game-cancelled");
-      socket.off("next-question");
       socket.off("answer-received");
     };
   }, [navigate]);
@@ -240,28 +270,27 @@ export default function Game() {
     setHasSubmitted(true);
     setSubmissionStatus('waiting');
 
+    // Construir la respuesta en el formato correcto
     const answer = {
-      topColor: topColor,
-      bottomColor: bottomColor,
-      symbol: symbol,
-      symbolPosition: symbolPosition,
-      number: number,
-      numberPosition: numberPosition,
-      character: selectedCharacter,
-      submittedAt: Date.now(),
-      isAutoSubmit: true
+      pictogram: symbol?.id || null,
+      colors: [
+        topColor?.name?.toLowerCase() || null,
+        bottomColor?.name?.toLowerCase() || null
+      ].filter(Boolean),
+      number: number || null
     };
 
     const pin = localStorage.getItem("gamePin");
     const username = localStorage.getItem("username");
+    const responseTime = timeLeft;
+
+    console.log("Respuesta auto-enviada (tiempo agotado):", answer);
 
     socket.emit("submit-answer", { 
       pin: pin,
-      username: username,
-      answer: answer 
+      answer: answer,
+      responseTime: responseTime
     });
-
-    console.log("Respuesta auto-enviada (tiempo agotado):", answer);
   };
 
   // Función para enviar respuesta manual
@@ -272,34 +301,47 @@ export default function Game() {
     setHasSubmitted(true);
     setSubmissionStatus('waiting');
 
+    // Construir la respuesta con los datos correctos
     const answer = {
-      topColor: topColor,
-      bottomColor: bottomColor,
-      symbol: symbol,
-      symbolPosition: symbolPosition,
-      number: number,
-      numberPosition: numberPosition,
-      character: selectedCharacter,
-      submittedAt: Date.now(),
-      isAutoSubmit: false
+      pictogram: symbol?.id || null,  // Usar symbol.id, no symbol.name
+      colors: [
+        topColor?.name?.toLowerCase() || null,
+        bottomColor?.name?.toLowerCase() || null
+      ].filter(Boolean), // Filtrar valores null/undefined
+      number: number || null
     };
 
     const pin = localStorage.getItem("gamePin");
     const username = localStorage.getItem("username");
+    const responseTime = timeLeft; // Tiempo que tardó en responder
 
-    socket.emit("submit-answer", { 
+    console.log("Enviando respuesta:", JSON.stringify(answer, null, 2));
+    console.log("PIN:", pin, "Username:", username, "ResponseTime:", responseTime);
+
+    socket.emit("submit-answer", {
       pin: pin,
-      username: username,
-      answer: answer 
+      answer: answer,
+      responseTime: responseTime
     });
-
-    console.log("Respuesta enviada manualmente:", answer);
   };
 
   // Verificar si puede enviar respuesta
   const canSubmit = () => {
     return topColor && bottomColor && symbol && !hasSubmitted && !isSubmitting;
   };
+
+  // Debug info - solo en desarrollo
+  if (process.env.NODE_ENV === 'development') {
+    console.log('Game State Debug:', {
+      question: question ? question.title : 'No question',
+      timeLeft,
+      gameHasStarted,
+      hasSubmitted,
+      isSubmitting,
+      currentStep,
+      progressPercentage
+    });
+  }
 
   return (
     <DndProvider backend={HTML5Backend}>
@@ -326,7 +368,12 @@ export default function Game() {
           <div className={styles.questionHeader}>
             <div className={styles.questionInfo}>
               <h2 className={styles.questionTitle}>
-                {question ? question.title : gameHasStarted ? "Preparando siguiente pregunta..." : "Esperando pregunta..."}
+                {question ? 
+                  question.title : 
+                  gameHasStarted ? 
+                    "Preparando siguiente pregunta..." : 
+                    "Esperando inicio del juego..."
+                }
               </h2>
               
               {question && (
@@ -512,25 +559,25 @@ export default function Game() {
                 </div>
               )}
 
-              {/* MODIFICADO: Waiting State - Solo mostrar si el juego nunca ha iniciado */}
+              {/* ESTADO: Esperando que el juego inicie por primera vez */}
               {!question && !gameHasStarted && (
                 <div className={styles.waitingCard}>
                   <div className={styles.waitingContent}>
                     <Clock size={48} />
-                    <h3>Esperando pregunta...</h3>
-                    <p>El administrador iniciará el juego pronto</p>
+                    <h3>Esperando inicio del juego</h3>
+                    <p>El administrador iniciará el juego desde su panel</p>
                     <div className={styles.waitingSpinner} />
                   </div>
                 </div>
               )}
 
-              {/* NUEVO: Estado entre preguntas - Cuando el juego ya inició pero no hay pregunta actual */}
+              {/* ESTADO: Entre preguntas (el juego ya inició pero no hay pregunta actual) */}
               {!question && gameHasStarted && (
                 <div className={styles.waitingCard}>
                   <div className={styles.waitingContent}>
-                    <Clock size={48} />
-                    <h3>Preparando siguiente pregunta...</h3>
-                    <p>El juego continuará en breve</p>
+                    <Zap size={48} />
+                    <h3>Preparando siguiente pregunta</h3>
+                    <p>La siguiente pregunta aparecerá en breve</p>
                     <div className={styles.waitingSpinner} />
                   </div>
                 </div>
