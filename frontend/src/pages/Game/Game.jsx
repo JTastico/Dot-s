@@ -26,7 +26,6 @@ export default function Game() {
   const [timeLeft, setTimeLeft] = useState(null);
   const [selectedCharacter, setSelectedCharacter] = useState(null);
   
-  // Estado para saber si el juego ha iniciado alguna vez
   const [gameHasStarted, setGameHasStarted] = useState(false);
 
   const [currentStep, setCurrentStep] = useState(1);
@@ -37,48 +36,38 @@ export default function Game() {
   const [number, setNumber] = useState(null);
   const [numberPosition, setNumberPosition] = useState(null);
 
-  // Estados para feedback visual
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
   const [progressPercentage, setProgressPercentage] = useState(0);
 
-  // Filtrar colores disponibles - incluir solid y pattern
   const availableColorOptions = availableColors.filter(
     (color) => color.type === 'solid' || color.type === 'pattern'
   );
 
-  // También tener disponibles solo los sólidos para casos específicos
   const solidColors = availableColors.filter((color) => color.type === 'solid');
 
   const handleTopColorDrop = (color) => {
     if (hasSubmitted) return;
-    
-    // Permitir tanto solid como pattern
     if (color.type !== 'solid' && color.type !== 'pattern') {
       alert("Por favor, arrastra un color válido para la parte superior.");
       return;
     }
-
     setTopColor(color);
   };
 
   const handleBottomColorDrop = (color) => {
     if (hasSubmitted) return;
-    
-    // Permitir tanto solid como pattern
     if (color.type !== 'solid' && color.type !== 'pattern') {
       alert("Por favor, arrastra un color válido para la parte inferior.");
       return;
     }
-
     setBottomColor(color);
   };
 
   const handleSymbolDrop = (symbol, position) => {
     if (hasSubmitted) return;
-    
     setSymbol(symbol);
     setSymbolPosition(position);
     setCurrentStep((prev) => (prev === 2 ? 3 : prev));
@@ -86,20 +75,17 @@ export default function Game() {
 
   const handleNumberDrop = (num, position) => {
     if (hasSubmitted) return;
-    
     setNumber(num === 'Sin Número' ? null : num);
     setNumberPosition(position);
     setCurrentStep((prev) => (prev === 3 ? 4 : prev));
   };
 
-  // Calcular progreso de completado
   useEffect(() => {
     let progress = 0;
     if (topColor) progress += 25;
     if (bottomColor) progress += 25;
     if (symbol) progress += 25;
     if (number !== null || currentStep >= 4) progress += 25;
-    
     setProgressPercentage(progress);
   }, [topColor, bottomColor, symbol, number, currentStep]);
 
@@ -109,16 +95,13 @@ export default function Game() {
     }
   }, [topColor, bottomColor, currentStep]);
 
-  // Efecto para manejar la cuenta regresiva
   useEffect(() => {
     let intervalId;
-
     if (timeLeft > 0 && !hasSubmitted) {
       intervalId = setInterval(() => {
         setTimeLeft(prevTime => {
           if (prevTime <= 1) {
             clearInterval(intervalId);
-            // Auto-submit si el tiempo se agota
             if (!hasSubmitted) {
               handleAutoSubmit();
             }
@@ -128,7 +111,6 @@ export default function Game() {
         });
       }, 1000);
     }
-
     return () => clearInterval(intervalId);
   }, [timeLeft, hasSubmitted]);
 
@@ -136,74 +118,33 @@ export default function Game() {
     const pin = localStorage.getItem("gamePin");
     const username = localStorage.getItem("username");
     
-    // Cargar información del personaje seleccionado
     const characterData = localStorage.getItem("selectedCharacter");
     if (characterData) {
       try {
         const character = JSON.parse(characterData);
         setSelectedCharacter(character);
-        console.log("Personaje cargado:", character);
       } catch (error) {
         console.error("Error al cargar personaje:", error);
       }
     }
 
-    // Verificar si el usuario viene del flujo correcto
     if (!username || !pin) {
-      console.log("Usuario no autenticado, redirigiendo al inicio");
       navigate("/");
       return;
     }
 
-    console.log(`Entrando al juego - PIN: ${pin}, Usuario: ${username}`);
-
-    // Marcar que el juego ya inició (vienen del countdown)
     setGameHasStarted(true);
 
-    // Solicitar la pregunta actual al entrar
-    console.log("Solicitando pregunta actual al servidor...");
     socket.emit("get-current-question", { pin }, (response) => {
-      console.log("Respuesta get-current-question:", response);
-
       if (response && response.success) {
         if (response.question) {
-          console.log("✅ Pregunta activa recibida:", response.question.title);
           setQuestion(response.question);
           setTimeLeft(response.timeLeft || 0);
-        } else {
-          console.log("⚠ No hay pregunta activa en este momento");
-          // Mantener gameHasStarted en true pero sin pregunta
         }
-      } else {
-        console.error("❌ Error obteniendo pregunta:", response?.error);
-        // Podrían estar entre preguntas
       }
     });
 
-    // También usar el método de respaldo para compatibilidad
-    socket.emit("request-current-question", { pin }, (response) => {
-      if (response.success && response.question && !question) {
-        setQuestion(response.question);
-        setTimeLeft(response.timeLeft);
-        setGameHasStarted(true);
-        console.log("Pregunta cargada (método respaldo):", response.question);
-      } else if (response.error && response.error.includes("No hay juego activo")) {
-        navigate("/waiting-room");
-      }
-    });
-
-    // Escuchar nueva pregunta (para cuando cambie)
-    socket.on("game-started", ({ question, timeLimit }) => {
-      console.log("🎯 Nueva pregunta recibida via game-started:", question.title);
-      resetGameState();
-      setQuestion(question);
-      setTimeLeft(timeLimit);
-      setGameHasStarted(true);
-    });
-
-    // Escuchar siguiente pregunta
     socket.on("next-question", ({ question, timeLimit }) => {
-      console.log("🎯 Siguiente pregunta recibida:", question.title);
       resetGameState();
       setQuestion(question);
       setTimeLeft(timeLimit);
@@ -211,7 +152,6 @@ export default function Game() {
     });
 
     socket.on("game-ended", ({ results }) => {
-      console.log("🏁 Juego terminado, redirigiendo a resultados");
       localStorage.removeItem("selectedCharacter");
       localStorage.removeItem("username");
       navigate("/game-results", { state: { results } });
@@ -224,7 +164,6 @@ export default function Game() {
       navigate("/");
     });
 
-    // Escuchar confirmación de respuesta
     socket.on("answer-received", ({ success, message }) => {
       setIsSubmitting(false);
       if (success) {
@@ -238,7 +177,6 @@ export default function Game() {
     });
 
     return () => {
-      socket.off("game-started");
       socket.off("next-question");
       socket.off("game-ended");
       socket.off("game-cancelled");
@@ -246,16 +184,6 @@ export default function Game() {
     };
   }, [navigate]);
 
-<<<<<<< HEAD
-  return (
-    
-    <DndProvider backend={HTML5Backend}>
-      
-      {/*Mostrar encabezado pero sin el boton de crear partida*/}
-      <Header timeLeft={timeLeft} showCreateButton={false}>
-      </Header>
-=======
-  // Función para resetear el estado del juego
   const resetGameState = () => {
     setTopColor(null);
     setBottomColor(null);
@@ -271,7 +199,6 @@ export default function Game() {
     setProgressPercentage(0);
   };
 
-  // Auto-submit cuando se agota el tiempo
   const handleAutoSubmit = () => {
     if (hasSubmitted) return;
     
@@ -279,7 +206,6 @@ export default function Game() {
     setHasSubmitted(true);
     setSubmissionStatus('waiting');
 
-    // Construir la respuesta en el formato correcto
     const answer = {
       pictogram: symbol?.id || null,
       colors: [
@@ -290,10 +216,7 @@ export default function Game() {
     };
 
     const pin = localStorage.getItem("gamePin");
-    const username = localStorage.getItem("username");
     const responseTime = timeLeft;
-
-    console.log("Respuesta auto-enviada (tiempo agotado):", answer);
 
     socket.emit("submit-answer", { 
       pin: pin,
@@ -302,7 +225,6 @@ export default function Game() {
     });
   };
 
-  // Función para enviar respuesta manual
   const submitAnswer = () => {
     if (hasSubmitted || isSubmitting) return;
     
@@ -310,22 +232,17 @@ export default function Game() {
     setHasSubmitted(true);
     setSubmissionStatus('waiting');
 
-    // Construir la respuesta con los datos correctos
     const answer = {
-      pictogram: symbol?.id || null,  // Usar symbol.id, no symbol.name
+      pictogram: symbol?.id || null,
       colors: [
         topColor?.name?.toLowerCase() || null,
         bottomColor?.name?.toLowerCase() || null
-      ].filter(Boolean), // Filtrar valores null/undefined
+      ].filter(Boolean),
       number: number || null
     };
 
     const pin = localStorage.getItem("gamePin");
-    const username = localStorage.getItem("username");
-    const responseTime = timeLeft; // Tiempo que tardó en responder
-
-    console.log("Enviando respuesta:", JSON.stringify(answer, null, 2));
-    console.log("PIN:", pin, "Username:", username, "ResponseTime:", responseTime);
+    const responseTime = timeLeft;
 
     socket.emit("submit-answer", {
       pin: pin,
@@ -334,23 +251,9 @@ export default function Game() {
     });
   };
 
-  // Verificar si puede enviar respuesta
   const canSubmit = () => {
     return topColor && bottomColor && symbol && !hasSubmitted && !isSubmitting;
   };
-
-  // Debug info - solo en desarrollo
-  if (process.env.NODE_ENV === 'development') {
-    console.log('Game State Debug:', {
-      question: question ? question.title : 'No question',
-      timeLeft,
-      gameHasStarted,
-      hasSubmitted,
-      isSubmitting,
-      currentStep,
-      progressPercentage
-    });
-  }
 
   return (
     <DndProvider backend={HTML5Backend}>
@@ -361,7 +264,6 @@ export default function Game() {
       />
 
       <div className={`${styles.gameWrapper} ${hasSubmitted ? styles.submitted : ''}`}>
-        {/* Success Animation Overlay */}
         {showSuccessAnimation && (
           <div className={styles.successOverlay}>
             <div className={styles.successAnimation}>
@@ -371,10 +273,8 @@ export default function Game() {
             </div>
           </div>
         )}
->>>>>>> master
 
         <div className={styles.gameContainer}>
-          {/* Enhanced Question Header */}
           <div className={styles.questionHeader}>
             <div className={styles.questionInfo}>
               <h2 className={styles.questionTitle}>
@@ -409,7 +309,6 @@ export default function Game() {
               )}
             </div>
 
-            {/* Character Indicator */}
             {selectedCharacter && (
               <div className={styles.characterBadge}>
                 <img 
@@ -425,29 +324,7 @@ export default function Game() {
             )}
           </div>
 
-<<<<<<< HEAD
-          <main className={styles.designerLayout}>
-            <section className="previewSection">
-              <LivePreviewRombo
-                topColorOption={topColor}
-                bottomColorOption={bottomColor}
-                symbolOption={symbol}
-                symbolPosition={symbolPosition}
-                number={number}
-                numberPosition={numberPosition}
-                onTopColorDrop={handleTopColorDrop}
-                onBottomColorDrop={handleBottomColorDrop}
-                onSymbolDrop={handleSymbolDrop}
-                onNumberDrop={handleNumberDrop}
-              />
-            </section>
-
-            <section className={styles.controlsSection}>
-              {currentStep === 1 && (
-                <ColorPicker colors={solidColors} title="Paso 1: Arrastra Colores (Superior / Inferior)" />
-=======
           <main className={styles.gameLayout}>
-            {/* Preview Section */}
             <section className={styles.previewSection}>
               <div className={styles.previewCard}>
                 <h3 className={styles.sectionTitle}>
@@ -470,7 +347,6 @@ export default function Game() {
               </div>
             </section>
 
-            {/* Controls Section */}
             <section className={styles.controlsSection}>
               {currentStep === 1 && question && (
                 <div className={styles.controlCard}>
@@ -480,7 +356,6 @@ export default function Game() {
                     disabled={hasSubmitted}
                   />
                 </div>
->>>>>>> master
               )}
 
               {currentStep === 2 && question && (
@@ -503,15 +378,6 @@ export default function Game() {
                 </div>
               )}
 
-<<<<<<< HEAD
-              {currentStep === 4 && (
-                <div className={styles.summarySection}>
-                  <h2>¡Pictograma Configurado!</h2>
-                  <p><strong>Color Superior:</strong> {topColor?.name || 'No seleccionado'}</p>
-                  <p><strong>Color Inferior:</strong> {bottomColor?.name || 'No seleccionado'}</p>
-                  <p><strong>Símbolo:</strong> {symbol?.name || 'No seleccionado'} ({symbolPosition || 'N/A'})</p>
-                  <p><strong>Número:</strong> {number || 'Ninguno'} ({numberPosition || 'N/A'})</p>
-=======
               {currentStep === 4 && !hasSubmitted && question && (
                 <div className={styles.controlCard}>
                   <div className={styles.summarySection}>
@@ -545,7 +411,7 @@ export default function Game() {
                 </div>
               )}
 
-              {/* ESTADO: Esperando que el juego inicie por primera vez */}
+              {/* Estados de Espera */}
               {!question && !gameHasStarted && (
                 <div className={styles.waitingCard}>
                   <div className={styles.waitingContent}>
@@ -557,7 +423,6 @@ export default function Game() {
                 </div>
               )}
 
-              {/* ESTADO: Entre preguntas (el juego ya inició pero no hay pregunta actual) */}
               {!question && gameHasStarted && (
                 <div className={styles.waitingCard}>
                   <div className={styles.waitingContent}>
@@ -566,7 +431,6 @@ export default function Game() {
                     <p>La siguiente pregunta aparecerá en breve</p>
                     <div className={styles.waitingSpinner} />
                   </div>
->>>>>>> master
                 </div>
               )}
             </section>
