@@ -4,12 +4,9 @@ import styles from "./Header.module.css";
 import logo from "../../assets/images/logo.png";
 import { Gamepad2, Users } from "lucide-react";
 
-<<<<<<< HEAD
-export default function Header({ children, timeLeft, showCreateButton = true }) {
-  const navigate = useNavigate();
-=======
+// Esta versión combina AMBOS cambios
 export default function Header({ children, timeLeft, showCreateButton = true, selectedCharacter }) {
->>>>>>> master
+  const navigate = useNavigate();
   const handleCreateGame = () => {
     navigate("/admin");
   };
