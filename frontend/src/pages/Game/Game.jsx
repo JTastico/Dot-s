@@ -436,61 +436,6 @@ export default function Game() {
                   onSymbolDrop={handleSymbolDrop}
                   onNumberDrop={handleNumberDrop}
                 />
-
-                {/* Submit Button */}
-                <div className={styles.submitSection}>
-                  <button 
-                    className={`${styles.submitButton} ${
-                      canSubmit() ? styles.canSubmit : styles.cannotSubmit
-                    } ${submissionStatus === 'waiting' ? styles.waiting : ''}`}
-                    onClick={submitAnswer}
-                    disabled={!canSubmit() || isSubmitting}
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <div className={styles.spinner} />
-                        Enviando...
-                      </>
-                    ) : hasSubmitted ? (
-                      <>
-                        <CheckCircle size={20} />
-                        ¡Enviado!
-                      </>
-                    ) : canSubmit() ? (
-                      <>
-                        <Send size={20} />
-                        Enviar Respuesta
-                      </>
-                    ) : (
-                      <>
-                        <AlertCircle size={20} />
-                        Completa el pictograma
-                      </>
-                    )}
-                  </button>
-
-                  {/* Status Messages */}
-                  {submissionStatus === 'success' && (
-                    <div className={styles.statusMessage}>
-                      <CheckCircle size={16} />
-                      ¡Respuesta recibida correctamente!
-                    </div>
-                  )}
-                  
-                  {submissionStatus === 'error' && (
-                    <div className={styles.statusMessage}>
-                      <AlertCircle size={16} />
-                      Error al enviar. Intenta de nuevo.
-                    </div>
-                  )}
-                  
-                  {hasSubmitted && submissionStatus === 'waiting' && (
-                    <div className={styles.statusMessage}>
-                      <Clock size={16} />
-                      Esperando siguiente pregunta...
-                    </div>
-                  )}
-                </div>
               </div>
             </section>
 
